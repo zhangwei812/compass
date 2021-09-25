@@ -38,6 +38,7 @@ func (d *commpassInfo) queryCommpassInfo(ss string) {
 		for k, _ := range d.relayerData {
 			bool1, bool2, relayerEpoch, _ := queryRegisterInfo(conn, d.relayerData[k].from)
 			fmt.Println("ADDRESS:", d.relayerData[k].from, "ISREGISTER:", bool1, " ISRELAYER :", bool2, " RELAYER_EPOCH :", relayerEpoch)
+			d.waitBecomeRelayer(*d.relayerData[k])
 		}
 	case REWARD:
 

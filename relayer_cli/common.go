@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
+	"github.com/ethereum/go-ethereum"
 	ethchain "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
@@ -14,9 +15,9 @@ import (
 	"github.com/mapprotocol/atlas/core/vm"
 	"github.com/mapprotocol/atlas/params"
 	params2 "github.com/mapprotocol/atlas/params"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/urfave/cli.v1"
 	"io/ioutil"
-	"log"
 	"math/big"
 	"strings"
 	"time"
@@ -63,6 +64,7 @@ type commpassInfo struct {
 	ethData        []types.Header
 	client         *ethclient.Client
 	relayerData    []*relayerInfo
+	ctx            *cli.Context
 }
 type relayerInfo struct {
 	url           string
@@ -80,6 +82,7 @@ func (d *commpassInfo) preWork(ctx *cli.Context) {
 	d.notifyCh = make(chan uint64)
 	d.client = conn
 	d.currentEpoch = 0
+	d.ctx = ctx
 	for k, _ := range d.relayerData {
 		Ele := d.relayerData[k]
 		priKey, from := loadprivate(Ele.url)
@@ -92,23 +95,8 @@ func (d *commpassInfo) preWork(ctx *cli.Context) {
 		bb := getBalance(conn, Ele.from)
 		Ele.preBalance = bb
 		Ele.nowBalance = bb
-		register(ctx, d.client, *d.relayerData[k])
-		for {
-			bool1, bool2, relayerEpoch, _ := queryRegisterInfo(conn, d.relayerData[k].from)
-			fmt.Println("ADDRESS:", d.relayerData[k].from, "ISREGISTER:", bool1, " ISRELAYER :", bool2, " RELAYER_EPOCH :", relayerEpoch)
-			if bool2 {
-				break
-			}
-			fmt.Println("waiting to become relayer...................................")
-			for {
-				time.Sleep(time.Second * 10)
-				bool1, bool2, relayerEpoch, _ := queryRegisterInfo(conn, d.relayerData[k].from)
-				if bool2 {
-					fmt.Println("ADDRESS:", d.relayerData[k].from, "ISREGISTER:", bool1, " ISRELAYER :", bool2, " RELAYER_EPOCH :", relayerEpoch)
-				}
-			}
-			break
-		}
+		//---- init person
+		person[k].Address = acc.String()
 	}
 }
 
@@ -150,15 +138,22 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 
 	gasLimit := uint64(2100000) // in units
 	// If the contract surely has code (or code is not needed), estimate the transaction
+	// 如果合同确实有代码（或不需要代码），则估计交易
 	msg := ethchain.CallMsg{From: from, To: &toAddress, GasPrice: gasPrice, Value: value, Data: input}
 	gasLimit, err = client.EstimateGas(context.Background(), msg)
 	if err != nil {
 		fmt.Println("Contract exec failed", err)
 	}
+	//fmt.Println("EstimateGas gasLimit : ", gasLimit)
 	if gasLimit < 1 {
 		gasLimit = 866328
 	}
-
+	//gasPrice = big.NewInt(10)
+	//gasLimit = 866328
+	//                8756485
+	//gasLimit = uint64(2403064) // in units
+	//fmt.Println("gasLimit: ", gasLimit)
+	//fmt.Println("gasPrice:", gasPrice)
 	// Create the transaction, sign it and schedule it for execution
 	tx := types.NewTransaction(nonce, toAddress, value, gasLimit, gasPrice, input)
 
@@ -182,6 +177,7 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 	for {
 		time.Sleep(time.Millisecond * 200)
 		_, isPending, err := client.TransactionByHash(context.Background(), txHash)
+
 		if err != nil {
 			panic(err)
 		}
@@ -202,6 +198,7 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 		fmt.Println("Transaction Success", " block Number", receipt.BlockNumber.Uint64(), " block txs", len(block.Transactions()), "blockhash", block.Hash().Hex())
 		return true
 	} else if receipt.Status == types.ReceiptStatusFailed {
+		fmt.Println("TX data nonce ", nonce, " transfer value ", value, " gasLimit ", gasLimit, " gasPrice ", gasPrice, " chainID ", chainID)
 		fmt.Println("Transaction Failed ", " Block Number", receipt.BlockNumber.Uint64())
 		return false
 	}
@@ -214,4 +211,46 @@ func packInput(abiHeaderStore abi.ABI, abiMethod string, params ...interface{}) 
 		log.Fatal(abiMethod, " error ", err)
 	}
 	return input
+}
+func SendContractTransactionWithoutOutputUnlessError(client *ethclient.Client, from, toAddress common.Address, value *big.Int, privateKey *ecdsa.PrivateKey, input []byte) *types.Transaction {
+	nonce, err := client.PendingNonceAt(context.Background(), from)
+	if err != nil {
+		log.Warnln(err)
+		return nil
+	}
+	gasPrice, err := client.SuggestGasPrice(context.Background())
+	if err != nil {
+		log.Warnln(err)
+		return nil
+	}
+	var gasLimit uint64
+	msg := ethereum.CallMsg{From: from, To: &toAddress, GasPrice: gasPrice, Value: value, Data: input}
+	gasLimit, err = client.EstimateGas(context.Background(), msg)
+	if err != nil {
+		log.Warnln("EstimateGas error: ", err)
+		return nil
+	}
+	tx := types.NewTx(&types.LegacyTx{
+		Nonce:    nonce,
+		Value:    value,
+		To:       &toAddress,
+		Gas:      gasLimit,
+		GasPrice: gasPrice,
+		Data:     input,
+	})
+	chainID, err := client.ChainID(context.Background())
+	if err != nil {
+		log.Infoln("Get ChainID error:", err)
+	}
+	signedTx, err := types.SignTx(tx, types.NewEIP2930Signer(chainID), privateKey)
+	if err != nil {
+		log.Warnln(err)
+		return nil
+	}
+	err = client.SendTransaction(context.Background(), signedTx)
+	if err != nil {
+		log.Warnln("SendTransaction error: ", err)
+		return nil
+	}
+	return signedTx
 }

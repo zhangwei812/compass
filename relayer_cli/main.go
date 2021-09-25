@@ -43,6 +43,26 @@ var (
 		Usage: "Relayer bft key for BFT (no 0x prefix)",
 		Value: "",
 	}
+	flags = []cli.Flag{
+		KeyFlag,
+		KeyStoreFlag,
+		RPCListenAddrFlag,
+		RPCPortFlag,
+		FeeFlag,
+	}
+	saveCommand = cli.Command{
+		Name:   "save",
+		Usage:  "Synchronous Data",
+		Action: MigrateFlags(save),
+		Flags:  flags,
+	}
+
+	txverifyCommand = cli.Command{
+		Name:   "txverify",
+		Usage:  "txverify Data",
+		Action: MigrateFlags(txverify),
+		Flags:  flags,
+	}
 )
 
 func init() {
@@ -65,7 +85,10 @@ func init() {
 		os.Exit(1)
 	}
 	// Add subcommands.
-	app.Commands = []cli.Command{}
+
+	app.Commands = []cli.Command{
+		saveCommand,
+		txverifyCommand}
 	cli.CommandHelpTemplate = OriginCommandHelpTemplate
 	sort.Sort(cli.CommandsByName(app.Commands))
 }
@@ -96,9 +119,12 @@ func start(ctx *cli.Context) error {
 		{url: keystore1},
 	}
 	commpassInfo.preWork(ctx)
+	// 验证
+	go commpassInfo.doTxVerity()
+	// 同步数据
+	commpassInfo.relayerRegister()
 	go commpassInfo.atlasBackend()
 	go commpassInfo.saveMock()
-	go commpassInfo.doTxVerity()
 	select {}
 	return nil
 }

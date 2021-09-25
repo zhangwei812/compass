@@ -70,6 +70,8 @@ func GetTxProve(ethClient ethclient.Client, aLog *types.Log, eventResponse *Even
 		BlockNumber: blockNumber,
 		TxIndex:     transactionIndex,
 	}
+	//a, _ := json.Marshal(txProve)
+	//fmt.Println("txProve------> ", string(a))
 
 	input, err := rlp.EncodeToBytes(txProve)
 	if err != nil {

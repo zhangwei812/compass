@@ -24,7 +24,6 @@ func (d *commpassInfo) getEthHeaders() []types.Header {
 	for i = 1; i <= LimitOnce; i++ {
 		Header, err := Ethconn.HeaderByNumber(context.Background(), big.NewInt(int64(startNum+i)))
 		if err != nil {
-			panic(err)
 			return Headers
 		}
 		Headers = append(Headers, *Header)

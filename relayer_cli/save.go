@@ -6,8 +6,23 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/mapprotocol/atlas/core/rawdb"
+	"gopkg.in/urfave/cli.v1"
 	"math/big"
 )
+
+func save(ctx *cli.Context) error {
+	commpassInfo := commpassInfo{}
+	commpassInfo.relayerData = []*relayerInfo{
+		{url: keystore1},
+	}
+	commpassInfo.preWork(ctx)
+	// 同步数据
+	commpassInfo.relayerRegister()
+	go commpassInfo.atlasBackend()
+	go commpassInfo.saveMock()
+	select {}
+	return nil
+}
 
 func (d *commpassInfo) saveMock() {
 	for {
@@ -19,23 +34,25 @@ func (d *commpassInfo) saveMock() {
 			d.doSave(d.getEthHeaders())
 			d.queryCommpassInfo(ChaintypeHeight)
 			d.atlasBackendCh <- NextStep
-
 		}
 	}
 }
 
 func (d *commpassInfo) doSave(chains []types.Header) {
 	fmt.Println("=================DO SAVE========================")
-	if len(chains) == 0 {
-		fmt.Println("error ! header len :", len(chains))
+	l := len(chains)
+	if l == 0 {
+		fmt.Println("ignore  header len :", len(chains))
 		return
 	}
 	marshal, _ := rlp.EncodeToBytes(chains)
 	conn := d.client
 	for k, _ := range d.relayerData {
 		fmt.Println("ADDRESS:", d.relayerData[k].from)
+		person[0].Count += int64(l)
 		d.relayerData[k].realSave(conn, ChainTypeETH, marshal)
 	}
+	saveConfig("person_info_save.json")
 }
 func (r *relayerInfo) realSave(conn *ethclient.Client, chainType rawdb.ChainType, marshal []byte) bool {
 	input := packInput(abiHeaderStore, "save", big.NewInt(int64(chainType)), big.NewInt(int64(ChainTypeMAP)), marshal)

@@ -22,10 +22,50 @@ type cfg struct {
 
 var config cfg
 
-func initConfig() {
+func initConfig1() {
+	fmt.Println("init config...")
 	data, err := ioutil.ReadFile(fmt.Sprintf("compass_config.json"))
 	if err != nil {
 		log.Crit("compass config readFile Err", err.Error())
 	}
 	_ = json.Unmarshal(data, &config)
+	initConfig2()
+}
+
+type PersonInfo struct {
+	Address  string
+	Count    int64
+	Txverity int64
+}
+
+var person []PersonInfo
+
+func initConfig2() {
+	data, err := ioutil.ReadFile(fmt.Sprintf("person_info_txverify.json"))
+	if err != nil {
+		log.Crit("compass personInfo config readFile Err", err.Error())
+	}
+	_ = json.Unmarshal(data, &person)
+	if person == nil || len(person) == 0 {
+		for i := 0; i < 10; i++ {
+			person = append(person, PersonInfo{})
+		}
+	}
+	//n := uint64(person[0].Txverity)
+	////if config.StartVerityNum < n {
+	////	config.StartVerityNum = n
+	////}
+	fmt.Println("init over")
+}
+
+func saveConfig(file string) {
+	// 创建文件
+	data, err := json.Marshal(person)
+	if err != nil {
+		fmt.Println("saveConfig file failed", err.Error(), "    ", file)
+		return
+	}
+	if err := ioutil.WriteFile(file, data, 1000); err != nil {
+		fmt.Println("saveConfig file failed", err.Error(), "    ", file)
+	}
 }

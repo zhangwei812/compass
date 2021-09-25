@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"log"
 )
@@ -12,8 +11,7 @@ var (
 )
 
 func init() {
-	fmt.Println("atlas 1 ")
-	initConfig()
+	initConfig1()
 	maxCount = config.MaxCount
 }
 

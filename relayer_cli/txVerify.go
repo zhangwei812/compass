@@ -56,6 +56,11 @@ func (d *commpassInfo) doTxVerity() {
 			if tempCount == 0 {
 				fmt.Println("waiting new Transation to Verity....... ")
 			}
+			//每过10分钟输出一次日志
+			if tempCount%600 == 0 {
+				d.queryCommpassInfo(ChaintypeHeight)
+			}
+
 			tempCount++
 			if tempCount > 1800 {
 				tempCount = 0
@@ -80,6 +85,8 @@ func (d *commpassInfo) doTxVerity1(fromBlock uint64, toBlock uint64) {
 	}
 	if len(logs) > 0 {
 		fmt.Println("Discover new transactions!!!    from:", fromBlock, "  to:", toBlock)
+	} else {
+		fmt.Println("no transactions to verify    from:", fromBlock, "  to:", toBlock)
 	}
 	for _, aLog := range logs {
 		if EventSwapOutHash != aLog.Topics[0] {

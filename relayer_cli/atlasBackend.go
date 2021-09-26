@@ -29,21 +29,24 @@ func (d *commpassInfo) atlasBackend() {
 	conn := d.client
 	canNext := true
 	go func() {
-		select {
-		case <-d.atlasBackendCh:
-			count++
-			if count >= maxCount {
-				canNext = false
-			} else if canNext {
-				// 次数没到 继续执行
-				number, err := conn.BlockNumber(context.Background())
-				if err != nil {
-					log.Fatal("get BlockNumber err ", err)
+		for {
+			select {
+			case <-d.atlasBackendCh:
+				count++
+				if count >= maxCount {
+					canNext = false
+				} else if canNext {
+					// 次数没到 继续执行
+					number, err := conn.BlockNumber(context.Background())
+					if err != nil {
+						log.Fatal("get BlockNumber err ", err)
+					}
+					currentEpoch := number / epochHeight
+					d.notifyCh <- currentEpoch
 				}
-				currentEpoch := number / epochHeight
-				d.notifyCh <- currentEpoch
 			}
 		}
+
 	}()
 
 	for {

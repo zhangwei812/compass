@@ -87,6 +87,7 @@ func (d *commpassInfo) doTxVerity1(fromBlock uint64, toBlock uint64) {
 		fmt.Println("Discover new transactions!!!    from:", fromBlock, "  to:", toBlock)
 	} else {
 		fmt.Println("no transactions to verify    from:", fromBlock, "  to:", toBlock)
+		fmt.Println("waiting new Transation to Verity....... ")
 	}
 	for _, aLog := range logs {
 		if EventSwapOutHash != aLog.Topics[0] {

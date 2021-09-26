@@ -15,10 +15,12 @@ import (
 )
 
 var (
-	RouterContractAddress     = config.RouterContractAddress
-	RouterContractAddress_map = config.RouterContractAddress_map
-	EventSwapOutHash          = crypto.Keccak256Hash([]byte("LogSwapOut(uint256,address,address,address,uint256,uint256,uint256)"))
-	currentVerityNum          = config.StartVerityNum // 开始验证区块
+	RouterContractAddress    = config.RouterContractAddress
+	Erc20ContractAddress     = config.ERC20ContractAddress
+	RouterContractAddressMap = config.RouterContractAddress_map
+	Erc20ContractAddressMap  = config.RouterContractAddress_map
+	EventSwapOutHash         = crypto.Keccak256Hash([]byte("LogSwapOut(uint256,address,address,address,uint256,uint256,uint256)"))
+	currentVerityNum         = config.StartVerityNum // 开始验证区块
 )
 
 func txverify(ctx *cli.Context) error {
@@ -33,10 +35,14 @@ func txverify(ctx *cli.Context) error {
 }
 func init() {
 	RouterContractAddress = config.RouterContractAddress
-	RouterContractAddress_map = config.RouterContractAddress_map
-	currentVerityNum = config.StartVerityNum // 开始验证区块
+	Erc20ContractAddress = config.ERC20ContractAddress
+	RouterContractAddressMap = config.RouterContractAddress_map
+	Erc20ContractAddressMap = config.ERC20ContractAddress_map
+	currentVerityNum = config.StartVerityNum // 开始验证区块起始头
 }
+
 func (d *commpassInfo) doTxVerity() {
+	tempCount := 0
 	for {
 		//d.doTxVerity1(currentVerityNum, 11104090)
 		//------验证,开始块 ------
@@ -46,6 +52,14 @@ func (d *commpassInfo) doTxVerity() {
 			currentVerityNum = num
 			person[0].Txverity = int64(num)
 			saveConfig("person_info_txverify.json")
+		} else {
+			if tempCount == 0 {
+				fmt.Println("waiting new Transation to Verity....... ")
+			}
+			tempCount++
+			if tempCount > 1800 {
+				tempCount = 0
+			}
 		}
 		time.Sleep(time.Second)
 	}
@@ -64,6 +78,9 @@ func (d *commpassInfo) doTxVerity1(fromBlock uint64, toBlock uint64) {
 	if err != nil {
 		panic(err)
 	}
+	if len(logs) > 0 {
+		fmt.Println("Discover new transactions!!!    from:", fromBlock, "  to:", toBlock)
+	}
 	for _, aLog := range logs {
 		if EventSwapOutHash != aLog.Topics[0] {
 			continue
@@ -81,10 +98,9 @@ func (d *commpassInfo) HandleLogSwapOut(aLog *types.Log, ethConn *ethclient.Clie
 	}
 	txProve := GetTxProve(*ethConn, aLog, &eventResponse)
 
-	token := common.BytesToAddress(aLog.Topics[1].Bytes())
-
+	//token := common.BytesToAddress(aLog.Topics[1].Bytes())
+	token := common.HexToAddress(Erc20ContractAddressMap)
 	conn := d.client
-
 	//input, _ := abiTxVerity.Pack("txVerify",
 	//	aLog.Address,
 	//	token,
@@ -99,11 +115,7 @@ func (d *commpassInfo) HandleLogSwapOut(aLog *types.Log, ethConn *ethclient.Clie
 	////fmt.Println("RouterContractAddress_map1",RouterContractAddress_map1)
 	//b := sendContractTransaction(conn, relayer.from, TxVerifyAddress, nil, relayer.priKey, input)
 
-	//function swapIn(uint256 id, address token, address to, uint amount, uint fromChainID, address sourceRouter, bytes memory data) external onlyMPC {
-
-	//swapverify.txVerify(sourceRouter,token,fromChainID,chainID,data);
 	to := common.BytesToAddress(aLog.Topics[3].Bytes())
-	//to := common.HexToAddress("0xb324c41ef2b839c7918553ecc0230cc279660299")
 	input := packInput(abiRouter, "swapIn",
 		eventResponse.OrderId,
 		token,
@@ -112,22 +124,19 @@ func (d *commpassInfo) HandleLogSwapOut(aLog *types.Log, ethConn *ethclient.Clie
 		eventResponse.FromChainID,
 		aLog.Address,
 		txProve)
-	//fmt.Println(eventResponse.OrderId,
-	//	token,
-	//	to,
-	//	eventResponse.Amount,
-	//	eventResponse.FromChainID,
-	//	aLog.Address)
-	//fmt.Println("txProve   ", common.Bytes2Hex(txProve))
 	if err != nil {
 		log.Fatal(abiRouter, " error ", err)
 	}
 	relayer := d.relayerData[0]
-	RouterContractAddress_map1 := common.HexToAddress(RouterContractAddress_map)
-	fmt.Println("RouterContractAddress_map", RouterContractAddress_map1)
-	fmt.Println("target Address:", to.String(), "  balance:", getBalance(conn, to))
-	//fmt.Println("relayer.from    ",relayer.from)
-	b := sendContractTransaction(conn, relayer.from, RouterContractAddress_map1, nil, relayer.priKey, input)
+	RouterContractAddressMap1 := common.HexToAddress(RouterContractAddressMap)
+	balance1 := getTargetAddressBalance(conn, relayer.from, to)
+	fmt.Println("target mint1 Address:", to.String(), "  balance:", balance1, "will mint:", eventResponse.Amount)
+	b := sendContractTransaction(conn, relayer.from, RouterContractAddressMap1, nil, relayer.priKey, input)
 	fmt.Println("TxVerify result:", b, "   eth blockNumber ", aLog.BlockNumber, "  transactionIndex: ", aLog.TxIndex)
-	fmt.Println("target Address:", to.String(), "  balance:", getBalance(conn, to))
+	balance2 := getTargetAddressBalance(conn, relayer.from, to)
+	c := balance2 - balance1
+	fmt.Println("target mint2 Address:", to.String(), "  balance:", balance2, "change money:", balance2-balance1)
+	if big.NewInt(int64(c)).Cmp(eventResponse.Amount) != 0 {
+		fmt.Println("err: abnormal mint---> Address:", to.String(), "  balance:", balance2, "change money:", balance2-balance1)
+	}
 }

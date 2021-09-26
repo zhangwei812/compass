@@ -63,6 +63,12 @@ var (
 		Action: MigrateFlags(txverify),
 		Flags:  flags,
 	}
+	sendTransationCommand = cli.Command{
+		Name:   "sendTransation",
+		Usage:  "sendTransation Data",
+		Action: MigrateFlags(sendTransation),
+		Flags:  flags,
+	}
 )
 
 func init() {
@@ -88,7 +94,8 @@ func init() {
 
 	app.Commands = []cli.Command{
 		saveCommand,
-		txverifyCommand}
+		txverifyCommand,
+		sendTransationCommand}
 	cli.CommandHelpTemplate = OriginCommandHelpTemplate
 	sort.Sort(cli.CommandsByName(app.Commands))
 }
@@ -121,10 +128,14 @@ func start(ctx *cli.Context) error {
 	commpassInfo.preWork(ctx)
 	// 验证
 	go commpassInfo.doTxVerity()
+
 	// 同步数据
 	commpassInfo.relayerRegister()
 	go commpassInfo.atlasBackend()
 	go commpassInfo.saveMock()
+
+	// 创造交易
+	go commpassInfo.sendTransationOnEth()
 	select {}
 	return nil
 }

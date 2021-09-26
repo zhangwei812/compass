@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"log"
 	"math/big"
 	"os"
@@ -110,4 +111,9 @@ func TestCommpassInfo_HandleLogSwapOut(t *testing.T) {
 	fmt.Println("awaiting signal")
 	<-done
 	fmt.Println("exiting")
+}
+
+func TestCommpassInfo_HandleLogSwapOut2(t *testing.T) {
+	EventSwapOutHash = crypto.Keccak256Hash([]byte("LogSwapOut(uint256,address,address,address,uint256,uint256,uint256)"))
+	fmt.Println(EventSwapOutHash.String())
 }

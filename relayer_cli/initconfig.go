@@ -10,7 +10,9 @@ import (
 type cfg struct {
 	Keystore                  string //keystore 路径
 	RouterContractAddress     string //以太坊合约
+	ERC20ContractAddress      string // 以太坊 ERC20/ token 地址
 	RouterContractAddress_map string // map合约
+	ERC20ContractAddress_map  string // map ERC20/ token 地址
 	MaxCount                  int    // 一届同步多少次
 	RegisterValue             uint64 // 质押多少钱
 	StartVerityNum            uint64 // 开始验证区块
@@ -18,6 +20,8 @@ type cfg struct {
 	AtlasUrl                  string
 	EthUrl                    string
 	Password                  string
+	DefaultTransactionAddress string // 默认往这个账号发钱 swapOut
+	DefaultAmount             uint64 // 默认发的钱
 }
 
 var config cfg

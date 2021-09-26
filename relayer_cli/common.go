@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/mapprotocol/atlas/chains"
 	"github.com/mapprotocol/atlas/core/vm"
 	"github.com/mapprotocol/atlas/params"
 	params2 "github.com/mapprotocol/atlas/params"
@@ -33,6 +34,7 @@ var (
 	abiRelayer, _      = abi.JSON(strings.NewReader(params2.RelayerABIJSON))
 	abiHeaderStore, _  = abi.JSON(strings.NewReader(params2.HeaderStoreABIJSON))
 	abiRouter, _       = abi.JSON(strings.NewReader(RouterContractAbi))
+	abiERC20, _        = abi.JSON(strings.NewReader(MapERC20ContractAbi))
 	abiTxVerity, _     = abi.JSON(strings.NewReader(params2.TxVerifyABIJSON))
 	RelayerAddress     = params2.RelayerAddress
 	HeaderStoreAddress = params2.HeaderStoreAddress
@@ -51,8 +53,8 @@ func init() {
 }
 
 const (
-	ChainTypeETH = 3
-	ChainTypeMAP = 211
+	ChainTypeETH = chains.ChainTypeETHTest
+	ChainTypeMAP = chains.ChainTypeMAP
 	// method name
 	CurNbrAndHash = vm.CurNbrAndHash
 )
@@ -148,12 +150,7 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 	if gasLimit < 1 {
 		gasLimit = 866328
 	}
-	//gasPrice = big.NewInt(10)
-	//gasLimit = 866328
-	//                8756485
-	//gasLimit = uint64(2403064) // in units
-	//fmt.Println("gasLimit: ", gasLimit)
-	//fmt.Println("gasPrice:", gasPrice)
+
 	// Create the transaction, sign it and schedule it for execution
 	tx := types.NewTransaction(nonce, toAddress, value, gasLimit, gasPrice, input)
 

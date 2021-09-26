@@ -141,3 +141,22 @@ func getRegisterBalance(conn *ethclient.Client, from common.Address) (uint64, ui
 	log.Fatal("Contract query failed result len == 0")
 	return 0, 0, 0
 }
+
+//  getTarget address balance
+func getTargetAddressBalance(conn *ethclient.Client, from common.Address, target common.Address) uint64 {
+	header, err := conn.HeaderByNumber(context.Background(), nil)
+	if err != nil {
+		panic(err)
+	}
+	input := packInput(abiERC20, "balanceOf", target)
+	ERC20 := common.HexToAddress(Erc20ContractAddressMap)
+	msg := ethchain.CallMsg{From: from, To: &ERC20, Data: input}
+	output, err := conn.CallContract(context.Background(), msg, header.Number)
+	if err != nil {
+		log.Fatal("method CallContract error", err)
+	}
+	method, _ := abiERC20.Methods["balanceOf"]
+	ret, err := method.Outputs.Unpack(output)
+	ret1 := ret[0].(*big.Int).Uint64()
+	return ret1
+}

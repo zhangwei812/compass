@@ -50,7 +50,6 @@ func (d *commpassInfo) doSave(chains []types.Header) {
 	marshal, _ := rlp.EncodeToBytes(chains)
 	conn := d.client
 	for k, _ := range d.relayerData {
-		fmt.Println("ADDRESS:", d.relayerData[k].from)
 		person[0].Count += int64(l)
 		d.relayerData[k].realSave(conn, ChainTypeETH, marshal)
 	}

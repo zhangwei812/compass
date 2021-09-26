@@ -38,15 +38,15 @@ func init() {
 }
 func (d *commpassInfo) doTxVerity() {
 	for {
-		d.doTxVerity1(currentVerityNum, 11104090)
+		//d.doTxVerity1(currentVerityNum, 11104090)
 		//------验证,开始块 ------
-		//num, _ := getCurrentNumberAbi(d.client, ChainTypeETH, d.relayerData[0].from)
-		//if num > currentVerityNum {
-		//	d.doTxVerity1(currentVerityNum, num)
-		//	currentVerityNum = num
-		//	person[0].Txverity = int64(num)
-		//	saveConfig("person_info_txverify.json")
-		//}
+		num, _ := getCurrentNumberAbi(d.client, ChainTypeETH, d.relayerData[0].from)
+		if num > currentVerityNum {
+			d.doTxVerity1(currentVerityNum, num)
+			currentVerityNum = num
+			person[0].Txverity = int64(num)
+			saveConfig("person_info_txverify.json")
+		}
 		time.Sleep(time.Second)
 	}
 }

@@ -43,7 +43,7 @@ func checkFee(fee *big.Int) {
 
 func (d *commpassInfo) relayerRegister() {
 	fmt.Println()
-	fmt.Println("--------------------relayerRegister-----------------------------------")
+	fmt.Println("--------------------do relayer Register-----------------------------------")
 	conn := d.client
 	ctx := d.ctx
 	for k, _ := range d.relayerData {

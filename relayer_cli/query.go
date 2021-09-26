@@ -26,18 +26,18 @@ func (d *commpassInfo) queryCommpassInfo(ss string) {
 	switch ss {
 	case BALANCE:
 		for k, _ := range d.relayerData {
-			fmt.Println("ADDRESS:", d.relayerData[k].from, " OLD BALANCE :", d.relayerData[k].preBalance, " NOW BALANCE :", getBalance(conn, d.relayerData[k].from))
+			fmt.Println("query BALANCE ADDRESS:", d.relayerData[k].from, " OLD BALANCE :", d.relayerData[k].preBalance, " NOW BALANCE :", getBalance(conn, d.relayerData[k].from))
 		}
 	case RegisterBalance:
 		for k, _ := range d.relayerData {
 			registered, unregistering, unregistered := getRegisterBalance(conn, d.relayerData[k].from)
-			fmt.Println("ADDRESS:", d.relayerData[k].from,
+			fmt.Println("query RegisterBalance ADDRESS:", d.relayerData[k].from,
 				" NOW registerValue BALANCE :", registered, " registerING BALANCE :", unregistering, "registerED BALANCE :", unregistered)
 		}
 	case QueryRelayerinfo:
 		for k, _ := range d.relayerData {
 			bool1, bool2, relayerEpoch, _ := queryRegisterInfo(conn, d.relayerData[k].from)
-			fmt.Println("ADDRESS:", d.relayerData[k].from, "ISREGISTER:", bool1, " ISRELAYER :", bool2, " RELAYER_EPOCH :", relayerEpoch)
+			fmt.Println("query QueryRelayerinfo ADDRESS:", d.relayerData[k].from, "ISREGISTER:", bool1, " ISRELAYER :", bool2, " RELAYER_EPOCH :", relayerEpoch)
 			d.waitBecomeRelayer(*d.relayerData[k])
 		}
 	case REWARD:
@@ -45,7 +45,7 @@ func (d *commpassInfo) queryCommpassInfo(ss string) {
 	case ChaintypeHeight:
 		for k, _ := range d.relayerData {
 			currentTypeHeight, hash := getCurrentNumberAbi(conn, ChainTypeETH, d.relayerData[k].from)
-			fmt.Println("ADDRESS:", d.relayerData[k].from, " TYPE HEIGHT:", currentTypeHeight, "  HASH:   ", hash)
+			fmt.Println("query ChaintypeHeight ADDRESS:", d.relayerData[k].from, " TYPE HEIGHT:", currentTypeHeight, "  HASH:   ", hash)
 		}
 	}
 

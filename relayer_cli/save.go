@@ -28,10 +28,13 @@ func (d *commpassInfo) saveMock() {
 	for {
 		select {
 		case currentEpoch := <-d.notifyCh:
-			fmt.Println("current epoch ========>", currentEpoch)
+			fmt.Println()
+			fmt.Println("=================DO SAVE========================current epoch :", currentEpoch)
 			d.queryCommpassInfo(ChaintypeHeight)
 			d.queryCommpassInfo(QueryRelayerinfo)
+			fmt.Println("doSave....")
 			d.doSave(d.getEthHeaders())
+			fmt.Println("doSave over")
 			d.queryCommpassInfo(ChaintypeHeight)
 			d.atlasBackendCh <- NextStep
 		}
@@ -39,7 +42,6 @@ func (d *commpassInfo) saveMock() {
 }
 
 func (d *commpassInfo) doSave(chains []types.Header) {
-	fmt.Println("=================DO SAVE========================")
 	l := len(chains)
 	if l == 0 {
 		fmt.Println("ignore  header len :", len(chains))

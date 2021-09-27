@@ -29,9 +29,11 @@ func sendTransation(ctx *cli.Context) error {
 }
 
 func (d *commpassInfo) sendTransationOnEth() {
+	count := 0
 	for {
 		fmt.Println()
-		fmt.Println("================= sendTransation to Eth========================")
+		count++
+		fmt.Println("================= sendTransation to Eth========================Number", count)
 		token := common.HexToAddress(Erc20ContractAddress)
 		to := common.HexToAddress(DefaultTransactionAddress)
 		amount := big.NewInt(int64(DefaultAmount))

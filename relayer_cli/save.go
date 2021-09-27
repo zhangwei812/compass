@@ -36,7 +36,7 @@ func (d *commpassInfo) saveMock() {
 			d.doSave(d.getEthHeaders())
 			fmt.Println("doSave over")
 			d.queryCommpassInfo(ChaintypeHeight)
-			d.atlasBackendCh <- NextStep
+			go func() { d.atlasBackendCh <- NextStep }()
 		}
 	}
 }

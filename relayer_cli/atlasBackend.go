@@ -42,7 +42,7 @@ func (d *commpassInfo) atlasBackend() {
 						log.Fatal("get BlockNumber err ", err)
 					}
 					currentEpoch := number / epochHeight
-					d.notifyCh <- currentEpoch
+					go func() { d.notifyCh <- currentEpoch }()
 				}
 			}
 		}

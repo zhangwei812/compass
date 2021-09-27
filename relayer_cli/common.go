@@ -185,12 +185,12 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 	}
 	receipt, err := client.TransactionReceipt(context.Background(), txHash)
 	if err != nil {
-		panic(err)
+		log.Error(err)
 	}
 	if receipt.Status == types.ReceiptStatusSuccessful {
 		block, err := client.BlockByHash(context.Background(), receipt.BlockHash)
 		if err != nil {
-			panic(err)
+			log.Error(err)
 		}
 		fmt.Println("Transaction Success", " block Number", receipt.BlockNumber.Uint64(), " block txs", len(block.Transactions()), "blockhash", block.Hash().Hex())
 		return true

@@ -130,12 +130,12 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 	// Ensure a valid value field and resolve the account nonce
 	nonce, err := client.PendingNonceAt(context.Background(), from)
 	if err != nil {
-		panic(err)
+		log.Error(err)
 	}
 
 	gasPrice, err := client.SuggestGasPrice(context.Background())
 	if err != nil {
-		panic(err)
+		log.Error(err)
 	}
 
 	gasLimit := uint64(2100000) // in units
@@ -156,18 +156,18 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 
 	chainID, err := client.ChainID(context.Background())
 	if err != nil {
-		panic(err)
+		log.Error(err)
 	}
 	//fmt.Println("TX data nonce ", nonce, " transfer value ", value, " gasLimit ", gasLimit, " gasPrice ", gasPrice, " chainID ", chainID)
 	signer := types.LatestSignerForChainID(chainID)
 	signedTx, err := types.SignTx(tx, signer, privateKey)
 	if err != nil {
-		panic(err)
+		log.Error(err)
 	}
 
 	err = client.SendTransaction(context.Background(), signedTx)
 	if err != nil {
-		panic(err)
+		log.Error(err)
 	}
 	txHash := signedTx.Hash()
 	count := 0
@@ -176,7 +176,7 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 		_, isPending, err := client.TransactionByHash(context.Background(), txHash)
 
 		if err != nil {
-			panic(err)
+			log.Error(err)
 		}
 		count++
 		if !isPending {

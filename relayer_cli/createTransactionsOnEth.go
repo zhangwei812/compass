@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/urfave/cli.v1"
 	"math/big"
 	"time"
@@ -48,7 +49,7 @@ func (d *commpassInfo) sendTransationOnEth() {
 		fmt.Println("from:", relayer.from.String(), "   to:", DefaultTransactionAddress, "  amount:", amount)
 		b := sendContractTransaction(EthConn, relayer.from, RouterContractAddress1, nil, relayer.priKey, input)
 		if !b {
-			panic("sendTransationOnEth err")
+			log.Error("sendTransationOnEth err")
 		}
 		fmt.Println("waiting next time(Once an hour) to sendTranstion............")
 		// 一个小时转一次

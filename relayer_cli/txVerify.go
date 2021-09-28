@@ -8,8 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/urfave/cli.v1"
-	"log"
 	"math/big"
 	"time"
 )
@@ -81,7 +81,7 @@ func (d *commpassInfo) doTxVerity1(fromBlock uint64, toBlock uint64) {
 	}
 	logs, err := EthConn.FilterLogs(context.Background(), query)
 	if err != nil {
-		panic(err)
+		log.Error(err)
 	}
 	if len(logs) > 0 {
 		fmt.Println("Discover new transactions!!!    from:", fromBlock, "  to:", toBlock)
@@ -102,7 +102,7 @@ func (d *commpassInfo) doTxVerity1(fromBlock uint64, toBlock uint64) {
 func (d *commpassInfo) HandleLogSwapOut(aLog *types.Log, ethConn *ethclient.Client) {
 	err := abiRouter.UnpackIntoInterface(&eventResponse, "LogSwapOut", aLog.Data)
 	if err != nil {
-		panic(err)
+		log.Error(err)
 	}
 	txProve := GetTxProve(*ethConn, aLog, &eventResponse)
 

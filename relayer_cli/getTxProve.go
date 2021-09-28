@@ -10,6 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/trie"
 	atlastypes "github.com/mapprotocol/atlas/core/types"
+	log "github.com/sirupsen/logrus"
 	"math/big"
 )
 
@@ -52,11 +53,11 @@ func GetTxProve(ethClient ethclient.Client, aLog *types.Log, eventResponse *Even
 	proof := light.NewNodeSet()
 	key, err := rlp.EncodeToBytes(transactionIndex)
 	if err != nil {
-		panic(err)
+		log.Error(err)
 	}
 	tr = atlastypes.DeriveTire(receipts, tr)
 	if err = tr.Prove(key, 0, proof); err != nil {
-		panic(err)
+		log.Error(err)
 	}
 
 	txProve := TxProve{
@@ -75,7 +76,7 @@ func GetTxProve(ethClient ethclient.Client, aLog *types.Log, eventResponse *Even
 
 	input, err := rlp.EncodeToBytes(txProve)
 	if err != nil {
-		panic(err)
+		log.Error(err)
 	}
 	return input
 }
@@ -87,16 +88,16 @@ func queryNewReceiptsAndTr(blockNumber uint64, conn *ethclient.Client) {
 	var err error
 	tr, err = trie.New(common.Hash{}, trie.NewDatabase(memorydb.New()))
 	if err != nil {
-		panic(err)
+		log.Error(err)
 	}
 	for i, r := range receipts {
 		key, err := rlp.EncodeToBytes(uint(i))
 		if err != nil {
-			panic(err)
+			log.Error(err)
 		}
 		value, err := rlp.EncodeToBytes(r)
 		if err != nil {
-			panic(err)
+			log.Error(err)
 		}
 
 		tr.Update(key, value)
@@ -105,10 +106,10 @@ func queryNewReceiptsAndTr(blockNumber uint64, conn *ethclient.Client) {
 func getTransactionsHashByBlockNumber(conn *ethclient.Client, number *big.Int) []common.Hash {
 	block, err := conn.BlockByNumber(context.Background(), number)
 	if err != nil {
-		panic(err)
+		log.Error(err)
 	}
 	if block == nil {
-		panic("failed to connect to the eth node, please check the network")
+		log.Error("failed to connect to the eth node, please check the network")
 	}
 
 	txs := make([]common.Hash, 0, len(block.Transactions()))
@@ -123,10 +124,10 @@ func getReceiptsByTxsHash(conn *ethclient.Client, txsHash []common.Hash) []*type
 	for _, h := range txsHash {
 		r, err := conn.TransactionReceipt(context.Background(), h)
 		if err != nil {
-			panic(err)
+			log.Error(err)
 		}
 		if r == nil {
-			panic("failed to connect to the eth node, please check the network")
+			log.Error("failed to connect to the eth node, please check the network")
 		}
 		rs = append(rs, r)
 	}

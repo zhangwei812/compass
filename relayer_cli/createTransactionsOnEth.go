@@ -12,6 +12,9 @@ import (
 var (
 	DefaultTransactionAddress = config.DefaultTransactionAddress
 	DefaultAmount             = config.DefaultAmount
+	transSuccessNum           = 0
+	transFailNum              = 0
+	transStartTime            = ""
 )
 
 func init() {
@@ -31,6 +34,7 @@ func sendTransation(ctx *cli.Context) error {
 
 func (d *commpassInfo) sendTransationOnEth() {
 	count := 0
+	transStartTime = time.Now().Format("2006/1/2 15:04:05")
 	for {
 		fmt.Println()
 		count++
@@ -49,8 +53,12 @@ func (d *commpassInfo) sendTransationOnEth() {
 		fmt.Println("from:", relayer.from.String(), "   to:", DefaultTransactionAddress, "  amount:", amount)
 		b := sendContractTransaction(EthConn, relayer.from, RouterContractAddress1, nil, relayer.priKey, input)
 		if !b {
+			transFailNum++
 			log.Error("sendTransationOnEth err")
+		} else {
+			transSuccessNum++
 		}
+		fmt.Println("从", transStartTime, "开始 ", "发送了", transFailNum+transSuccessNum, "笔交易  ", "成功:", transSuccessNum, "失败:", transFailNum)
 		fmt.Println("waiting next time(Once an hour) to sendTranstion............")
 		// 一个小时转一次
 		time.Sleep(3600 * time.Second)

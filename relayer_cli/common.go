@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
-	"github.com/ethereum/go-ethereum"
 	ethchain "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
@@ -186,6 +185,15 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 	receipt, err := client.TransactionReceipt(context.Background(), txHash)
 	if err != nil {
 		log.Error(err)
+		for {
+			time.Sleep(time.Millisecond * 200)
+			receipt, err = client.TransactionReceipt(context.Background(), txHash)
+			if err != nil {
+				log.Error(err)
+			} else {
+				break
+			}
+		}
 	}
 	if receipt.Status == types.ReceiptStatusSuccessful {
 		block, err := client.BlockByHash(context.Background(), receipt.BlockHash)
@@ -208,46 +216,4 @@ func packInput(abiHeaderStore abi.ABI, abiMethod string, params ...interface{}) 
 		log.Fatal(abiMethod, " error ", err)
 	}
 	return input
-}
-func SendContractTransactionWithoutOutputUnlessError(client *ethclient.Client, from, toAddress common.Address, value *big.Int, privateKey *ecdsa.PrivateKey, input []byte) *types.Transaction {
-	nonce, err := client.PendingNonceAt(context.Background(), from)
-	if err != nil {
-		log.Warnln(err)
-		return nil
-	}
-	gasPrice, err := client.SuggestGasPrice(context.Background())
-	if err != nil {
-		log.Warnln(err)
-		return nil
-	}
-	var gasLimit uint64
-	msg := ethereum.CallMsg{From: from, To: &toAddress, GasPrice: gasPrice, Value: value, Data: input}
-	gasLimit, err = client.EstimateGas(context.Background(), msg)
-	if err != nil {
-		log.Warnln("EstimateGas error: ", err)
-		return nil
-	}
-	tx := types.NewTx(&types.LegacyTx{
-		Nonce:    nonce,
-		Value:    value,
-		To:       &toAddress,
-		Gas:      gasLimit,
-		GasPrice: gasPrice,
-		Data:     input,
-	})
-	chainID, err := client.ChainID(context.Background())
-	if err != nil {
-		log.Infoln("Get ChainID error:", err)
-	}
-	signedTx, err := types.SignTx(tx, types.NewEIP2930Signer(chainID), privateKey)
-	if err != nil {
-		log.Warnln(err)
-		return nil
-	}
-	err = client.SendTransaction(context.Background(), signedTx)
-	if err != nil {
-		log.Warnln("SendTransaction error: ", err)
-		return nil
-	}
-	return signedTx
 }

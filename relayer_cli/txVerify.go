@@ -21,6 +21,16 @@ var (
 	Erc20ContractAddressMap  = config.RouterContractAddress_map
 	EventSwapOutHash         = crypto.Keccak256Hash([]byte("LogSwapOut(uint256,address,address,address,uint256,uint256,uint256)"))
 	currentVerityNum         = config.StartVerityNum // 开始验证区块
+	// 记录
+	txSuccessNum = 0
+	txFailNum    = 0
+	txFailRecord = map[int]struct {
+		ethNum   int
+		logIndex int
+	}{}
+	nowEthBlockInAtlas = 0
+	nowEthBlock        = 0
+	txStartTime        = ""
 )
 
 func txverify(ctx *cli.Context) error {
@@ -43,6 +53,7 @@ func init() {
 
 func (d *commpassInfo) doTxVerity() {
 	tempCount := 0
+	txStartTime = time.Now().Format("2006/1/2 15:04:05")
 	for {
 		//d.doTxVerity1(currentVerityNum, 11104090)
 		//------验证,开始块 ------
@@ -71,6 +82,7 @@ func (d *commpassInfo) doTxVerity() {
 }
 
 func (d *commpassInfo) doTxVerity1(fromBlock uint64, toBlock uint64) {
+	nowEthBlockInAtlas = int(toBlock)
 	fmt.Println()
 	fmt.Println("=================DO TxVerity========================")
 	EthConn, _ := dialEthConn()
@@ -93,7 +105,7 @@ func (d *commpassInfo) doTxVerity1(fromBlock uint64, toBlock uint64) {
 		if EventSwapOutHash != aLog.Topics[0] {
 			continue
 		}
-		fmt.Println("-----aLog index:", aLog.Index)
+		fmt.Println("在以太坊块:", aLog.BlockNumber, "交易ID:", aLog.Index)
 		d.HandleLogSwapOut(&aLog, EthConn)
 		fmt.Println()
 	}
@@ -139,12 +151,32 @@ func (d *commpassInfo) HandleLogSwapOut(aLog *types.Log, ethConn *ethclient.Clie
 	RouterContractAddressMap1 := common.HexToAddress(RouterContractAddressMap)
 	balance1 := getTargetAddressBalance(conn, relayer.from, to)
 	fmt.Println("target mint1 Address:", to.String(), "  balance:", balance1, "will mint:", eventResponse.Amount)
-	b := sendContractTransaction(conn, relayer.from, RouterContractAddressMap1, nil, relayer.priKey, input)
-	fmt.Println("TxVerify result:", b, "   eth blockNumber ", aLog.BlockNumber, "  transactionIndex: ", aLog.TxIndex)
+	result := sendContractTransaction(conn, relayer.from, RouterContractAddressMap1, nil, relayer.priKey, input)
+	fmt.Println("TxVerify result:", result, "   eth blockNumber ", aLog.BlockNumber, "  transactionIndex: ", aLog.TxIndex)
+	txRecord(result, aLog, d)
 	balance2 := getTargetAddressBalance(conn, relayer.from, to)
 	c := balance2 - balance1
 	fmt.Println("target mint2 Address:", to.String(), "  balance:", balance2, "change money:", balance2-balance1)
 	if big.NewInt(int64(c)).Cmp(eventResponse.Amount) != 0 {
 		fmt.Println("err: abnormal mint---> Address:", to.String(), "  balance:", balance2, "change money:", balance2-balance1)
+	}
+}
+
+func txRecord(result bool, aLog *types.Log, d *commpassInfo) {
+	if result {
+		txSuccessNum++
+	} else {
+		txFailNum++
+		txFailRecord[len(txFailRecord)] = struct {
+			ethNum   int
+			logIndex int
+		}{ethNum: int(aLog.BlockNumber), logIndex: int(aLog.TxIndex)}
+	}
+	l := len(txFailRecord)
+	nowNum, _ := d.client.BlockNumber(context.Background())
+	fmt.Println("验证了", txSuccessNum+txFailNum, " 成功了:", txSuccessNum, " 失败了:", txFailNum, "验证到了", currentVerityNum, "当前atlas上Eth高度是:", nowEthBlockInAtlas, "atals的块高", nowNum)
+	for l > 0 {
+		l--
+		fmt.Println("eth上第", txFailRecord[l].ethNum, "个块", "交易index是:", txFailRecord[l].logIndex)
 	}
 }

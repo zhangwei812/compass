@@ -63,7 +63,6 @@ func initConfig2() {
 }
 
 func saveConfig(file string) {
-	// 创建文件
 	data, err := json.Marshal(person)
 	if err != nil {
 		fmt.Println("saveConfig file failed", err.Error(), "    ", file)

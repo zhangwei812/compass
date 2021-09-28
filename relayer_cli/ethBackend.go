@@ -19,6 +19,9 @@ func dialEthConn() (*ethclient.Client, string) {
 func (d *commpassInfo) getEthHeaders() []types.Header {
 	Ethconn, _ := dialEthConn()
 	startNum, _ := getCurrentNumberAbi(d.client, ChainTypeETH, d.relayerData[0].from)
+	nowEthBlockInAtlas = int(startNum)
+	a, _ := Ethconn.BlockNumber(context.Background())
+	nowEthBlock = int(a)
 	Headers := make([]types.Header, 0)
 	var i uint64
 	for i = 1; i <= LimitOnce; i++ {

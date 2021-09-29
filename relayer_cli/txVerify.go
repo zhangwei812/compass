@@ -145,13 +145,13 @@ func (d *commpassInfo) HandleLogSwapOut(aLog *types.Log, ethConn *ethclient.Clie
 		eventResponse.FromChainID,
 		aLog.Address,
 		txProve)
-	fmt.Println(eventResponse.OrderId,
-		token,
-		to,
-		eventResponse.Amount,
-		eventResponse.FromChainID,
-		aLog.Address)
-	fmt.Println(common.Bytes2Hex(txProve))
+	//fmt.Println(eventResponse.OrderId,
+	//	token,
+	//	to,
+	//	eventResponse.Amount,
+	//	eventResponse.FromChainID,
+	//	aLog.Address)
+	//fmt.Println(common.Bytes2Hex(txProve))
 
 	if err != nil {
 		Fatal(abiRouter, " error ", err)

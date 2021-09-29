@@ -18,7 +18,7 @@ var (
 	RouterContractAddress    = config.RouterContractAddress
 	Erc20ContractAddress     = config.ERC20ContractAddress
 	RouterContractAddressMap = config.RouterContractAddress_map
-	Erc20ContractAddressMap  = config.RouterContractAddress_map
+	Erc20ContractAddressMap  = config.ERC20ContractAddress_map
 	EventSwapOutHash         = crypto.Keccak256Hash([]byte("LogSwapOut(uint256,address,address,address,uint256,uint256,uint256)"))
 	currentVerityNum         = config.StartVerityNum // 开始验证区块
 	// 记录
@@ -34,7 +34,6 @@ var (
 )
 
 func txverify(ctx *cli.Context) error {
-	initCfg(ctx)
 	commpassInfo := commpassInfo{}
 	commpassInfo.relayerData = []*relayerInfo{
 		{url: keystore1},
@@ -44,7 +43,7 @@ func txverify(ctx *cli.Context) error {
 	commpassInfo.doTxVerity()
 	return nil
 }
-func init5() {
+func init() {
 	RouterContractAddress = config.RouterContractAddress
 	Erc20ContractAddress = config.ERC20ContractAddress
 	RouterContractAddressMap = config.RouterContractAddress_map
@@ -135,6 +134,7 @@ func (d *commpassInfo) HandleLogSwapOut(aLog *types.Log, ethConn *ethclient.Clie
 	////RouterContractAddress_map1:=common.HexToAddress(RouterContractAddress_map)
 	////fmt.Println("RouterContractAddress_map1",RouterContractAddress_map1)
 	//b := sendContractTransaction(conn, relayer.from, TxVerifyAddress, nil, relayer.priKey, input)
+
 	to := common.BytesToAddress(aLog.Topics[3].Bytes())
 	input := packInput(abiRouter, "swapIn",
 		eventResponse.OrderId,
@@ -144,14 +144,6 @@ func (d *commpassInfo) HandleLogSwapOut(aLog *types.Log, ethConn *ethclient.Clie
 		eventResponse.FromChainID,
 		aLog.Address,
 		txProve)
-	//fmt.Println(eventResponse.OrderId,
-	//	token,
-	//	to,
-	//	eventResponse.Amount,
-	//	eventResponse.FromChainID,
-	//	aLog.Address)
-	//fmt.Println(common.Bytes2Hex(txProve))
-
 	if err != nil {
 		Fatal(abiRouter, " error ", err)
 	}

@@ -7,7 +7,7 @@
   "ERC20ContractAddress_map": "0x5c1545A6781ba2c8A7eac15e072C3d76AC158340",
   "AtlasUrl": "http://159.138.90.210:7445",
   "EthUrl": "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-  "MaxCount": 100,
+  "MaxCount": 10000,
   "RegisterValue": 100000,
   "StartVerityNum": 11130620,
   "LimitOnce": 100,

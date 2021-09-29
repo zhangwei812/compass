@@ -32,10 +32,10 @@ func (d *commpassInfo) atlasBackend() {
 		for {
 			select {
 			case <-d.atlasBackendCh:
-				count++
 				if count >= maxCount {
 					canNext = false
 				} else if canNext {
+					count++
 					// 次数没到 继续执行
 					number, err := conn.BlockNumber(context.Background())
 					if err != nil {

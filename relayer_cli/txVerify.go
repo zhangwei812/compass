@@ -43,7 +43,7 @@ func txverify(ctx *cli.Context) error {
 	commpassInfo.doTxVerity()
 	return nil
 }
-func init() {
+func init5() {
 	RouterContractAddress = config.RouterContractAddress
 	Erc20ContractAddress = config.ERC20ContractAddress
 	RouterContractAddressMap = config.RouterContractAddress_map

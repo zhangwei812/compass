@@ -34,6 +34,7 @@ var (
 )
 
 func txverify(ctx *cli.Context) error {
+	initCfg(ctx)
 	commpassInfo := commpassInfo{}
 	commpassInfo.relayerData = []*relayerInfo{
 		{url: keystore1},

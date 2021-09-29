@@ -128,7 +128,7 @@ func (d *commpassInfo) HandleLogSwapOut(aLog *types.Log, ethConn *ethclient.Clie
 	//	eventResponse.ToChainID,
 	//	txProve)
 	//if err != nil {
-	//	log.Fatal(abiRouter, " error ", err)
+	//	Fatal(abiRouter, " error ", err)
 	//}
 	//relayer := d.relayerData[0]
 	////RouterContractAddress_map1:=common.HexToAddress(RouterContractAddress_map)
@@ -144,8 +144,16 @@ func (d *commpassInfo) HandleLogSwapOut(aLog *types.Log, ethConn *ethclient.Clie
 		eventResponse.FromChainID,
 		aLog.Address,
 		txProve)
+	fmt.Println(eventResponse.OrderId,
+		token,
+		to,
+		eventResponse.Amount,
+		eventResponse.FromChainID,
+		aLog.Address)
+	fmt.Println(common.Bytes2Hex(txProve))
+
 	if err != nil {
-		log.Fatal(abiRouter, " error ", err)
+		Fatal(abiRouter, " error ", err)
 	}
 	relayer := d.relayerData[0]
 	RouterContractAddressMap1 := common.HexToAddress(RouterContractAddressMap)

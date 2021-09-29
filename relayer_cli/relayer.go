@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"gopkg.in/urfave/cli.v1"
-	"log"
 	"math/big"
 	"time"
 )
@@ -27,7 +26,7 @@ const (
 func register(ctx *cli.Context, conn *ethclient.Client, info relayerInfo) {
 	value := ethToWei(info.registerValue)
 	if info.registerValue < RegisterAmount {
-		log.Fatal("Amount must bigger than ", RegisterAmount)
+		Fatal("Amount must bigger than ", RegisterAmount)
 	}
 	fee := ctx.GlobalUint64(FeeFlag.Name)
 	checkFee(new(big.Int).SetUint64(fee))
@@ -37,7 +36,7 @@ func register(ctx *cli.Context, conn *ethclient.Client, info relayerInfo) {
 
 func checkFee(fee *big.Int) {
 	if fee.Sign() < 0 || fee.Cmp(Base) > 0 {
-		log.Fatal("Please set correct fee value")
+		Fatal("Please set correct fee value")
 	}
 }
 

@@ -41,6 +41,7 @@ var (
 	LimitOnce          = config.LimitOnce // 一次最多同步多少个
 	AtlasUrl           = config.AtlasUrl
 	EthUrl             = config.EthUrl
+	client             *ethclient.Client
 )
 
 func init() {
@@ -116,11 +117,11 @@ func weiToEth(value *big.Int) uint64 {
 func loadprivate(keyfile string) (*ecdsa.PrivateKey, common.Address) {
 	keyjson, err := ioutil.ReadFile(keyfile)
 	if err != nil {
-		log.Fatal(fmt.Errorf("failed to read the keyfile at '%s': %v", keyfile, err))
+		Fatal(fmt.Errorf("failed to read the keyfile at '%s': %v", keyfile, err))
 	}
 	key, err := keystore.DecryptKey(keyjson, password)
 	if err != nil {
-		log.Fatal(fmt.Errorf("error decrypting key: %v", err))
+		Fatal(fmt.Errorf("error decrypting key: %v", err))
 	}
 	priKey1 := key.PrivateKey
 	return priKey1, crypto.PubkeyToAddress(priKey1.PublicKey)
@@ -213,7 +214,27 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 func packInput(abiHeaderStore abi.ABI, abiMethod string, params ...interface{}) []byte {
 	input, err := abiHeaderStore.Pack(abiMethod, params...)
 	if err != nil {
-		log.Fatal(abiMethod, " error ", err)
+		Fatal(abiMethod, " error ", err)
 	}
 	return input
+}
+
+func reconnection(c *ethclient.Client) {
+	conn, err := ethclient.Dial(AtlasUrl)
+	for err != nil {
+		fmt.Println(err)
+		time.Sleep(1 * time.Second)
+	}
+	c = conn
+}
+func Fatal(args ...interface{}) {
+	s := args[0].(string)
+	if strings.HasPrefix(s, "Post") {
+		reconnection(client)
+	}
+	Fatal(args)
+}
+
+func funcName() commpassInfo {
+	return commpassInfo{}
 }

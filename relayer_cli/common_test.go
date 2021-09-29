@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"log"
+	"github.com/ethereum/go-ethereum/ethclient"
+	log "github.com/sirupsen/logrus"
 	"math/big"
 	"os"
 	"os/signal"
@@ -31,7 +33,7 @@ func Test_CommpassInfo_preWork(t *testing.T) {
 	commpassInfo.relayerData[0].priKey = p
 	value := ethToWei(RegisterAmount)
 	if commpassInfo.relayerData[0].registerValue < RegisterAmount {
-		log.Fatal("Amount must bigger than ", RegisterAmount)
+		Fatal("Amount must bigger than ", RegisterAmount)
 	}
 	checkFee(new(big.Int).SetUint64(0))
 	input := packInput(abiRelayer, "register", value)
@@ -116,4 +118,29 @@ func TestCommpassInfo_HandleLogSwapOut(t *testing.T) {
 func TestCommpassInfo_HandleLogSwapOut2(t *testing.T) {
 	EventSwapOutHash = crypto.Keccak256Hash([]byte("LogSwapOut(uint256,address,address,address,uint256,uint256,uint256)"))
 	fmt.Println(EventSwapOutHash.String())
+}
+
+func TestCommpassInfo_HandleLogSwapOut3commpassInfo_HandleLogSwapOut2(t *testing.T) {
+	log.Error("err")
+	fmt.Println("zhangwei")
+	now := time.Now().UTC() // time.Time implements fmt.Stringer.
+	fmt.Printf("%v %q\n", now, now)
+}
+
+func TestGetTxProve2(t *testing.T) {
+	conn, err := ethclient.Dial("http://localhost:80820")
+	if err != nil {
+		fmt.Println(err)
+	}
+	for {
+		a, _ := conn.BlockNumber(context.Background())
+		fmt.Println(a)
+	}
+
+}
+func TestCommpassIpOut3(t *testing.T) {
+	conf := 0  // 配置、终端默认设置
+	bg := 0    // 背景色、终端默认设置
+	text := 31 // 前景色、红色
+	fmt.Printf("%c[%d;%d;%dm%s%c[0m\n", 0x1B, conf, bg, text, "testPrintColor", 0x1B)
 }

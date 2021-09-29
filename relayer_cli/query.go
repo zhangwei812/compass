@@ -74,7 +74,7 @@ func queryRegisterInfo(conn *ethclient.Client, from common.Address) (bool, bool,
 	msg := ethchain.CallMsg{From: from, To: &RelayerAddress, Data: input}
 	output, err := conn.CallContract(context.Background(), msg, header.Number)
 	if err != nil {
-		log.Fatal("method CallContract error", err)
+		Fatal("method CallContract error", err)
 	}
 
 	method, _ := abiRelayer.Methods["getRelayer"]
@@ -106,7 +106,7 @@ func getCurrentNumberAbi(conn *ethclient.Client, chainType rawdb.ChainType, from
 	msg := ethchain.CallMsg{From: from, To: &HeaderStoreAddress, Data: input}
 	output, err := conn.CallContract(context.Background(), msg, header.Number)
 	if err != nil {
-		log.Fatal("method CallContract error", err)
+		Fatal("method CallContract error", err)
 	}
 	method, _ := abiHeaderStore.Methods[CurNbrAndHash]
 	ret, err := method.Outputs.Unpack(output)
@@ -124,7 +124,7 @@ func getRegisterBalance(conn *ethclient.Client, from common.Address) (uint64, ui
 	msg := ethchain.CallMsg{From: from, To: &RelayerAddress, Data: input}
 	output, err := conn.CallContract(context.Background(), msg, header.Number)
 	if err != nil {
-		log.Fatal("method CallContract error", err)
+		Fatal("method CallContract error", err)
 	}
 	method, _ := abiRelayer.Methods["getRelayerBalance"]
 	ret, err := method.Outputs.Unpack(output)
@@ -140,7 +140,7 @@ func getRegisterBalance(conn *ethclient.Client, from common.Address) (uint64, ui
 		}
 		return weiToEth(args.registered), weiToEth(args.unregistering), weiToEth(args.unregistered)
 	}
-	log.Fatal("Contract query failed result len == 0")
+	Fatal("Contract query failed result len == 0")
 	return 0, 0, 0
 }
 
@@ -155,7 +155,7 @@ func getTargetAddressBalance(conn *ethclient.Client, from common.Address, target
 	msg := ethchain.CallMsg{From: from, To: &ERC20, Data: input}
 	output, err := conn.CallContract(context.Background(), msg, header.Number)
 	if err != nil {
-		log.Fatal("method CallContract error", err)
+		Fatal("method CallContract error", err)
 	}
 	method, _ := abiERC20.Methods["balanceOf"]
 	ret, err := method.Outputs.Unpack(output)

@@ -48,7 +48,7 @@ func (d *commpassInfo) sendTransationOnEth() {
 			token,
 			to,
 			amount,
-			big.NewInt(int64(ChainTypeMAP)))
+			big.NewInt(int64(ChainTypeMAPTemp)))
 		relayer := d.relayerData[0]
 		RouterContractAddress1 := common.HexToAddress(RouterContractAddress)
 		fmt.Println("from:", relayer.from.String(), "   to:", DefaultTransactionAddress, "  amount:", amount)

@@ -60,10 +60,12 @@ func (d *commpassInfo) doTxVerity() {
 		//------验证,开始块 ------
 		num, _ := getCurrentNumberAbi(d.client, ChainTypeETH, d.relayerData[0].from)
 		if num > currentVerityNum {
-			d.doTxVerity1(currentVerityNum, num)
-			currentVerityNum = num
-			person[0].Txverity = int64(num)
-			saveConfig("person_info_txverify.json")
+			if num > 11130866 {
+				d.doTxVerity1(currentVerityNum, num)
+				currentVerityNum = num
+				person[0].Txverity = int64(num)
+				saveConfig("person_info_txverify.json")
+			}
 		} else {
 			if tempCount == 0 {
 				fmt.Println("waiting new Transation to Verity....... ")
@@ -135,7 +137,6 @@ func (d *commpassInfo) HandleLogSwapOut(aLog *types.Log, ethConn *ethclient.Clie
 	////RouterContractAddress_map1:=common.HexToAddress(RouterContractAddress_map)
 	////fmt.Println("RouterContractAddress_map1",RouterContractAddress_map1)
 	//b := sendContractTransaction(conn, relayer.from, TxVerifyAddress, nil, relayer.priKey, input)
-
 	to := common.BytesToAddress(aLog.Topics[3].Bytes())
 	input := packInput(abiRouter, "swapIn",
 		eventResponse.OrderId,

@@ -27,9 +27,17 @@ type cfg struct {
 
 var config cfg
 
+func initCfg(ctx *cli.Context) {
+	initConfig1(ctx)
+	init1()
+	init2()
+	init3()
+	init4()
+	init5()
+}
 func initConfig1(ctx *cli.Context) {
 	name := ctx.Command.Name
-	configName := "compass_config.json"
+	configName := "compass_config_txverify.json"
 	if name == "save" {
 		configName = "compass_config_save.json"
 	}

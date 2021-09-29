@@ -57,6 +57,8 @@ const (
 	ChainTypeMAP = chains.ChainTypeMAP
 	// method name
 	CurNbrAndHash = vm.CurNbrAndHash
+
+	ChainTypeMAPTemp = 177
 )
 
 type commpassInfo struct {

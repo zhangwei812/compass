@@ -34,6 +34,7 @@ var (
 )
 
 func txverify(ctx *cli.Context) error {
+	initCfg(ctx)
 	commpassInfo := commpassInfo{}
 	commpassInfo.relayerData = []*relayerInfo{
 		{url: keystore1},
@@ -43,7 +44,7 @@ func txverify(ctx *cli.Context) error {
 	commpassInfo.doTxVerity()
 	return nil
 }
-func init() {
+func init5() {
 	RouterContractAddress = config.RouterContractAddress
 	Erc20ContractAddress = config.ERC20ContractAddress
 	RouterContractAddressMap = config.RouterContractAddress_map

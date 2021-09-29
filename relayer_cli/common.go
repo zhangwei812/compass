@@ -44,7 +44,7 @@ var (
 	client             *ethclient.Client
 )
 
-func init() {
+func init2() {
 	keystore1 = config.Keystore
 	password = config.Password
 	LimitOnce = config.LimitOnce // 一次最多同步多少个

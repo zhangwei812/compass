@@ -15,7 +15,7 @@ var (
 	contractQueryFailedErr = errors.New("Contract query failed result ")
 )
 
-func init() {
+func init3() {
 	registerValue = config.RegisterValue
 }
 

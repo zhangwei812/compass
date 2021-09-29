@@ -1,0 +1,16 @@
+{
+  "Keystore": ".\/keystore\/UTC--2021-09-18T02-37-29.614751180Z--5fc316bc118026f3839ddd737cae6838f9dc992b",
+  "Password": "123456",
+  "RouterContractAddress": "0x23dd5A89C3ea51601b0674a4fA6eC6B3B14d0B7a",
+  "ERC20ContractAddress": "0x937afD74F97824789DA1f21AB75d19067bFb71dD",
+  "RouterContractAddress_map": "0x5eb64619426e69452F6cEe88Fe992b6cDFA25543",
+  "ERC20ContractAddress_map": "0x489202EFb43917Cc428adb9D7DF988ECB3696e5e",
+  "AtlasUrl": "http://159.138.90.210:7445",
+  "EthUrl": "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+  "MaxCount": 100,
+  "RegisterValue": 100000,
+  "StartVerityNum": 11104089,
+  "LimitOnce": 100,
+  "DefaultTransactionAddress": "0xb324C41EF2B839C7918553EcC0230cC279660299",
+  "DefaultAmount": 1
+}

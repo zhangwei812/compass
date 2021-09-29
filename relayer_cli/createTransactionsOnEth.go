@@ -17,11 +17,12 @@ var (
 	transStartTime            = ""
 )
 
-func init() {
+func init4() {
 	DefaultTransactionAddress = config.DefaultTransactionAddress
 	DefaultAmount = config.DefaultAmount
 }
 func sendTransation(ctx *cli.Context) error {
+	initCfg(ctx)
 	commpassInfo := commpassInfo{}
 	commpassInfo.relayerData = []*relayerInfo{
 		{url: keystore1},

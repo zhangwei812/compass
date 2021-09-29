@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"gopkg.in/urfave/cli.v1"
 	"log"
 )
 
@@ -10,9 +11,13 @@ var (
 	maxCount = config.MaxCount
 )
 
-func init() {
-	initConfig1()
+func initCfg(ctx *cli.Context) {
+	initConfig1(ctx)
 	maxCount = config.MaxCount
+	init2()
+	init3()
+	init4()
+	init5()
 }
 
 func getAtlasConn() *ethclient.Client {

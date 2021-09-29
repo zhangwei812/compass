@@ -25,6 +25,7 @@ var (
 )
 
 func save(ctx *cli.Context) error {
+	initCfg(ctx)
 	commpassInfo := commpassInfo{}
 	commpassInfo.relayerData = []*relayerInfo{
 		{url: keystore1},

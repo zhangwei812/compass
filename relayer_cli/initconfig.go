@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/log"
+	"gopkg.in/urfave/cli.v1"
 	"io/ioutil"
 )
 
@@ -26,9 +27,14 @@ type cfg struct {
 
 var config cfg
 
-func initConfig1() {
+func initConfig1(ctx *cli.Context) {
+	name := ctx.Command.Name
+	configName := "compass_config.json"
+	if name == "save" {
+		configName = "compass_config_save.json"
+	}
 	fmt.Println("init config...")
-	data, err := ioutil.ReadFile(fmt.Sprintf("compass_config.json"))
+	data, err := ioutil.ReadFile(fmt.Sprintf(configName))
 	if err != nil {
 		log.Crit("compass config readFile Err", err.Error())
 	}

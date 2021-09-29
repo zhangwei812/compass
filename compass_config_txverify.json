@@ -9,7 +9,7 @@
   "EthUrl": "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
   "MaxCount": 100,
   "RegisterValue": 100000,
-  "StartVerityNum": 11130620,
+  "StartVerityNum": 11130866,
   "LimitOnce": 100,
   "DefaultTransactionAddress": "0xb324C41EF2B839C7918553EcC0230cC279660299",
   "DefaultAmount": 1

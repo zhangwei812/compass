@@ -60,7 +60,7 @@ func (d *commpassInfo) doTxVerity() {
 		//------验证,开始块 ------
 		num, _ := getCurrentNumberAbi(d.client, ChainTypeETH, d.relayerData[0].from)
 		if num > currentVerityNum {
-			if num > 11130866 {
+			if num > uint64(11130866) {
 				d.doTxVerity1(currentVerityNum, num)
 				currentVerityNum = num
 				person[0].Txverity = int64(num)

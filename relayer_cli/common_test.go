@@ -139,8 +139,5 @@ func TestGetTxProve2(t *testing.T) {
 
 }
 func TestCommpassIpOut3(t *testing.T) {
-	conf := 0  // 配置、终端默认设置
-	bg := 0    // 背景色、终端默认设置
-	text := 31 // 前景色、红色
-	fmt.Printf("%c[%d;%d;%dm%s%c[0m\n", 0x1B, conf, bg, text, "testPrintColor", 0x1B)
+	fmt.Println(11130866 > uint64(11130866))
 }

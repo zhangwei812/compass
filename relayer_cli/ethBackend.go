@@ -23,7 +23,13 @@ func (d *commpassInfo) getEthHeaders() []types.Header {
 	a, _ := Ethconn.BlockNumber(context.Background())
 	nowEthBlock = int(a)
 	Headers := make([]types.Header, 0)
+	// 让eth处理完分叉再进行同步数据 只同步比eth小13的块
+	if a <= startNum+12 {
+		return Headers
+	}
+
 	var i uint64
+	LimitOnce = min(LimitOnce, a-startNum-12)
 	for i = 1; i <= LimitOnce; i++ {
 		Header, err := Ethconn.HeaderByNumber(context.Background(), big.NewInt(int64(startNum+i)))
 		if err != nil {
@@ -32,4 +38,11 @@ func (d *commpassInfo) getEthHeaders() []types.Header {
 		Headers = append(Headers, *Header)
 	}
 	return Headers
+}
+
+func min(x, y uint64) uint64 {
+	if x > y {
+		return y
+	}
+	return x
 }

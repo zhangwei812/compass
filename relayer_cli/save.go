@@ -68,9 +68,8 @@ func (d *commpassInfo) doSave(chains []types.Header) {
 	for k, _ := range d.relayerData {
 		person[0].Count += int64(l)
 		b := d.relayerData[k].realSave(conn, ChainTypeETH, marshal)
-		saveRecord(b, int(chains[0].Number.Uint64()), int(chains[0].Number.Uint64()), d)
+		saveRecord(b, int(chains[0].Number.Uint64()), int(chains[l-1].Number.Uint64()), d)
 	}
-
 	saveConfig("person_info_save.json")
 }
 func (r *relayerInfo) realSave(conn *ethclient.Client, chainType rawdb.ChainType, marshal []byte) bool {

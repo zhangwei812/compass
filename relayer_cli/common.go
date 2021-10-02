@@ -87,7 +87,7 @@ func (d *commpassInfo) preWork(ctx *cli.Context) {
 	d.client = conn
 	d.currentEpoch = 0
 	d.ctx = ctx
-	for k, _ := range d.relayerData {
+	for k := range d.relayerData {
 		Ele := d.relayerData[k]
 		priKey, from := loadprivate(Ele.url)
 		var acc common.Address
@@ -201,7 +201,7 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 	if receipt.Status == types.ReceiptStatusSuccessful {
 		block, err := client.BlockByHash(context.Background(), receipt.BlockHash)
 		if err != nil {
-			log.Error(err)
+			log.Error(err, "receipt.BlockHash:", receipt.BlockHash)
 		}
 		fmt.Println("Transaction Success", " block Number", receipt.BlockNumber.Uint64(), " block txs", len(block.Transactions()), "blockhash", block.Hash().Hex())
 		return true
@@ -235,8 +235,4 @@ func Fatal(args ...interface{}) {
 		reconnection(client)
 	}
 	Fatal(args)
-}
-
-func funcName() commpassInfo {
-	return commpassInfo{}
 }

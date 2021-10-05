@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/log"
 	"gopkg.in/urfave/cli.v1"
 	"math/big"
 	"time"
@@ -26,7 +27,7 @@ const (
 func register(ctx *cli.Context, conn *ethclient.Client, info relayerInfo) {
 	value := ethToWei(info.registerValue)
 	if info.registerValue < RegisterAmount {
-		Fatal("Amount must bigger than ", RegisterAmount)
+		Fatal("register", "Amount must bigger than ", RegisterAmount)
 	}
 	fee := ctx.GlobalUint64(FeeFlag.Name)
 	checkFee(new(big.Int).SetUint64(fee))
@@ -42,23 +43,23 @@ func checkFee(fee *big.Int) {
 
 func (d *commpassInfo) relayerRegister() {
 	fmt.Println()
-	fmt.Println("--------------------do relayer Register-----------------------------------")
+	log.Info("--------------------do relayer Register-----------------------------------")
 	conn := d.client
 	ctx := d.ctx
 	for k, _ := range d.relayerData {
 		register(ctx, d.client, *d.relayerData[k])
 		for {
 			bool1, bool2, relayerEpoch, _ := queryRegisterInfo(conn, d.relayerData[k].from)
-			fmt.Println("ADDRESS:", d.relayerData[k].from, "ISREGISTER:", bool1, " ISRELAYER :", bool2, " RELAYER_EPOCH :", relayerEpoch)
+			log.Info("relayerInfo", "ADDRESS", d.relayerData[k].from, "ISREGISTER", bool1, " ISRELAYER", bool2, " RELAYER_EPOCH", relayerEpoch)
 			if bool2 {
 				break
 			}
-			fmt.Println("waiting to become relayer...................................")
+			log.Info("waiting to become relayer...................................")
 			for {
 				time.Sleep(time.Second * 10)
 				bool1, bool2, relayerEpoch, _ := queryRegisterInfo(conn, d.relayerData[k].from)
 				if bool2 {
-					fmt.Println("ADDRESS:", d.relayerData[k].from, "ISREGISTER:", bool1, " ISRELAYER :", bool2, " RELAYER_EPOCH :", relayerEpoch)
+					log.Info("relayerInfo", "ADDRESS", d.relayerData[k].from, "ISREGISTER", bool1, " ISRELAYER ", bool2, " RELAYER_EPOCH", relayerEpoch)
 					break
 				}
 			}
@@ -71,11 +72,11 @@ func (d *commpassInfo) waitBecomeRelayer(info relayerInfo) {
 	register(d.ctx, d.client, info)
 	for {
 		bool1, bool2, relayerEpoch, _ := queryRegisterInfo(conn, info.from)
-		fmt.Println("ADDRESS:", info.from, "ISREGISTER:", bool1, " ISRELAYER :", bool2, " RELAYER_EPOCH :", relayerEpoch)
+		log.Info("relayerInfo", "ADDRESS", info.from, "ISREGISTER", bool1, " ISRELAYER ", bool2, " RELAYER_EPOCH", relayerEpoch)
 		if bool2 {
 			break
 		}
-		fmt.Println("waiting to become relayer...................................")
+		log.Info("waiting to become relayer...................................")
 		for {
 			time.Sleep(time.Second * 10)
 			_, bool2, _, _ := queryRegisterInfo(conn, info.from)

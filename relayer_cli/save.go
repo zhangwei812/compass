@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/mapprotocol/atlas/core/rawdb"
 	"gopkg.in/urfave/cli.v1"
@@ -45,12 +46,12 @@ func (d *commpassInfo) saveMock() {
 		select {
 		case currentEpoch := <-d.notifyCh:
 			fmt.Println()
-			fmt.Println("=================DO SAVE========================current epoch :", currentEpoch)
+			log.Info("=================DO SAVE========================", "current epoch ", currentEpoch)
 			d.queryCommpassInfo(ChaintypeHeight)
 			d.queryCommpassInfo(QueryRelayerinfo)
-			fmt.Println("doSave....")
+			log.Info("doSave....")
 			d.doSave(d.getEthHeaders())
-			fmt.Println("doSave over")
+			log.Info("doSave over")
 			d.queryCommpassInfo(ChaintypeHeight)
 			go func() { d.atlasBackendCh <- NextStep }()
 		}
@@ -60,7 +61,7 @@ func (d *commpassInfo) saveMock() {
 func (d *commpassInfo) doSave(chains []types.Header) {
 	l := len(chains)
 	if l == 0 {
-		fmt.Println("ignore  header len :", len(chains))
+		log.Info("ignore  header", " len ", len(chains))
 		return
 	}
 	marshal, _ := rlp.EncodeToBytes(chains)
@@ -92,10 +93,10 @@ func saveRecord(result bool, start, end int, d *commpassInfo) {
 		}{start: start, end: end, time: time.Now().String()}
 	}
 	nowNum, _ := d.client.BlockNumber(context.Background())
-	fmt.Println("从", saveStartTime, "开始 ", " 同步 成功次数:", saveSuccessNum, "   失败次数:", saveFailNum, "   同步了", saveCount, "个块", "  当前atlas上Eth高度是:", nowEthBlockInAtlas, "atals的块高", nowNum, "Eth当前的块高:", nowEthBlock)
+	log.Info("数据保存", "开始时间", saveStartTime, " 成功次数", saveSuccessNum, "失败次数", saveFailNum, "本次同步数量", saveCount, "当前atlas上Eth高度", nowEthBlockInAtlas, "atals的块高", nowNum, "Eth当前的块高", nowEthBlock)
 	l := len(saveFailRecord)
 	for l > 0 {
 		l--
-		fmt.Println("eth上第", saveFailRecord[l].start, "到", saveFailRecord[l].end, "保存失败, 时间:", saveFailRecord[l].time)
+		log.Info("数据保存", "eth上第", saveFailRecord[l].start, "到", saveFailRecord[l].end, "保存失败, 时间:", saveFailRecord[l].time)
 	}
 }

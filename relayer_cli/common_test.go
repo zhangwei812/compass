@@ -7,7 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
-	log "github.com/sirupsen/logrus"
+	"github.com/ethereum/go-ethereum/log"
 	"math/big"
 	"os"
 	"os/signal"
@@ -33,7 +33,7 @@ func Test_CommpassInfo_preWork(t *testing.T) {
 	commpassInfo.relayerData[0].priKey = p
 	value := ethToWei(RegisterAmount)
 	if commpassInfo.relayerData[0].registerValue < RegisterAmount {
-		Fatal("Amount must bigger than ", RegisterAmount)
+		Fatal("Test_CommpassInfo_preWork", "Amount must bigger than ", RegisterAmount)
 	}
 	checkFee(new(big.Int).SetUint64(0))
 	input := packInput(abiRelayer, "register", value)
@@ -61,7 +61,7 @@ func TestGetTxProve(t *testing.T) {
 	// 创建文件
 	filePtr, err := os.Create("person_info.json")
 	if err != nil {
-		fmt.Println("Create file failed", err.Error())
+		log.Info("Create file ", " failed", err.Error())
 		return
 	}
 	defer filePtr.Close()
@@ -71,16 +71,16 @@ func TestGetTxProve(t *testing.T) {
 
 	err = encoder.Encode(personInfo)
 	if err != nil {
-		fmt.Println("Encoder failed", err.Error())
+		log.Info("Encoder ", "failed", err.Error())
 
 	} else {
-		fmt.Println("Encoder success")
+		log.Info("Encoder success")
 	}
 }
 func TestMigrateFlags(t *testing.T) {
 	filePtr, err := os.Open("person_info.json")
 	if err != nil {
-		//fmt.Println("Open file failed [Err:%s]", err.Error())
+		//log.Info("Open file failed [Err:%s]", err.Error())
 		return
 	}
 	defer filePtr.Close()
@@ -110,19 +110,19 @@ func TestCommpassInfo_HandleLogSwapOut(t *testing.T) {
 		done <- true
 	}()
 
-	fmt.Println("awaiting signal")
+	log.Info("awaiting signal")
 	<-done
-	fmt.Println("exiting")
+	log.Info("exiting")
 }
 
 func TestCommpassInfo_HandleLogSwapOut2(t *testing.T) {
 	EventSwapOutHash = crypto.Keccak256Hash([]byte("LogSwapOut(uint256,address,address,address,uint256,uint256,uint256)"))
-	fmt.Println(EventSwapOutHash.String())
+	log.Info(EventSwapOutHash.String())
 }
 
 func TestCommpassInfo_HandleLogSwapOut3commpassInfo_HandleLogSwapOut2(t *testing.T) {
 	log.Error("err")
-	fmt.Println("zhangwei")
+	log.Info("zhangwei")
 	now := time.Now().UTC() // time.Time implements fmt.Stringer.
 	fmt.Printf("%v %q\n", now, now)
 }
@@ -136,8 +136,24 @@ func TestGetTxProve2(t *testing.T) {
 		a, _ := conn.BlockNumber(context.Background())
 		fmt.Println(a)
 	}
-
 }
+
 func TestCommpassIpOut3(t *testing.T) {
-	fmt.Println(11130866 > uint64(11130866))
+	AtlasUrl = "http://159.138.90.210:7445"
+	conn := getAtlasConn()
+	getTargetAddressBalance(conn, common.HexToAddress("0x5fc316bc118026f3839ddd737cae6838f9dc992b"), common.HexToAddress("0x021385BfB106ac5D5fF145bd421E420919C02F2B"))
+}
+
+func TestCommpassInfo_HandleLogSwapOut3(t *testing.T) {
+	for i := 1; i < 1; i++ { // 1 2 {} 3
+		fmt.Println("1111")
+	}
+	var s []int = []int{1, 2, 3, 4}
+	for i := range s {
+		fmt.Println(i)
+	}
+}
+
+func TestCommpassIndddfo_HandleLogSwapOut3(t *testing.T) {
+	log.Info("ss ", "df", "s")
 }

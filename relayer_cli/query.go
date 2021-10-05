@@ -2,12 +2,11 @@ package main
 
 import (
 	"context"
-	"fmt"
 	ethchain "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/mapprotocol/atlas/core/rawdb"
-	log "github.com/sirupsen/logrus"
 	"math"
 	"math/big"
 )
@@ -26,18 +25,18 @@ func (d *commpassInfo) queryCommpassInfo(ss string) {
 	switch ss {
 	case BALANCE:
 		for k, _ := range d.relayerData {
-			fmt.Println("query balance address:", d.relayerData[k].from, " old balance :", d.relayerData[k].preBalance, " now balance :", getBalance(conn, d.relayerData[k].from))
+			log.Info("query balance", "ADDRESS", d.relayerData[k].from, " old balance", d.relayerData[k].preBalance, " now balance", getBalance(conn, d.relayerData[k].from))
 		}
 	case RegisterBalance:
 		for k, _ := range d.relayerData {
 			registered, unregistering, unregistered := getRegisterBalance(conn, d.relayerData[k].from)
-			fmt.Println("query RegisterBalance ADDRESS:", d.relayerData[k].from,
-				" NOW registerValue BALANCE :", registered, " register BALANCE :", unregistering, "registered balance :", unregistered)
+			log.Info("query RegisterBalance", "ADDRESS", d.relayerData[k].from,
+				" NOW registerValue BALANCE", registered, " register BALANCE", unregistering, "registered balance", unregistered)
 		}
 	case QueryRelayerinfo:
 		for k, _ := range d.relayerData {
 			bool1, bool2, relayerEpoch, _ := queryRegisterInfo(conn, d.relayerData[k].from)
-			fmt.Println("query QueryRelayerinfo ADDRESS:", d.relayerData[k].from, "register success:", bool1, " isrelayer :", bool2, " relayer_epoch :", relayerEpoch)
+			log.Info("query QueryRelayerinfo", "ADDRESS", d.relayerData[k].from, "register success", bool1, " isrelayer", bool2, " relayer_epoch", relayerEpoch)
 			if !bool2 {
 				d.waitBecomeRelayer(*d.relayerData[k])
 			}
@@ -47,7 +46,7 @@ func (d *commpassInfo) queryCommpassInfo(ss string) {
 	case ChaintypeHeight:
 		for k, _ := range d.relayerData {
 			currentTypeHeight, hash := getCurrentNumberAbi(conn, ChainTypeETH, d.relayerData[k].from)
-			fmt.Println("query header_currentNumberAndHash: ", currentTypeHeight, "  HASH: ", hash, " My txverify record num:", person[0].Txverity)
+			log.Info("query header_currentNumberAndHash:", "currentTypeHeight", currentTypeHeight, "  HASH:", hash, " My txverify record num", person[0].Txverity)
 		}
 	}
 
@@ -56,7 +55,7 @@ func (d *commpassInfo) queryCommpassInfo(ss string) {
 func getBalance(conn *ethclient.Client, address common.Address) *big.Float {
 	balance, err := conn.BalanceAt(context.Background(), address, nil)
 	if err != nil {
-		log.Error(err)
+		log.Error("getBalance", err)
 	}
 	balance2 := new(big.Float)
 	balance2.SetString(balance.String())
@@ -67,14 +66,14 @@ func getBalance(conn *ethclient.Client, address common.Address) *big.Float {
 func queryRegisterInfo(conn *ethclient.Client, from common.Address) (bool, bool, *big.Int, error) {
 	header, err := conn.HeaderByNumber(context.Background(), nil)
 	if err != nil {
-		log.Error(err)
+		log.Error("queryRegisterInfo HeaderByNumber", err)
 	}
 	var input []byte
 	input = packInput(abiRelayer, "getRelayer", from)
 	msg := ethchain.CallMsg{From: from, To: &RelayerAddress, Data: input}
 	output, err := conn.CallContract(context.Background(), msg, header.Number)
 	if err != nil {
-		Fatal("method CallContract error", err)
+		Fatal("method CallContract", "error", err)
 	}
 
 	method, _ := abiRelayer.Methods["getRelayer"]
@@ -91,7 +90,7 @@ func queryRegisterInfo(conn *ethclient.Client, from common.Address) (bool, bool,
 		}
 		return args.register, args.relayer, args.epoch, nil
 	} else {
-		fmt.Println("Contract query failed result len == 0")
+		log.Info("Contract query failed result len == 0")
 		return false, false, nil, contractQueryFailedErr
 	}
 }
@@ -100,13 +99,13 @@ func queryRegisterInfo(conn *ethclient.Client, from common.Address) (bool, bool,
 func getCurrentNumberAbi(conn *ethclient.Client, chainType rawdb.ChainType, from common.Address) (uint64, string) {
 	header, err := conn.HeaderByNumber(context.Background(), nil)
 	if err != nil {
-		log.Error(err)
+		log.Error("getCurrentNumberAbi", err)
 	}
 	input := packInput(abiHeaderStore, CurNbrAndHash, big.NewInt(int64(chainType)))
 	msg := ethchain.CallMsg{From: from, To: &HeaderStoreAddress, Data: input}
 	output, err := conn.CallContract(context.Background(), msg, header.Number)
 	if err != nil {
-		Fatal("method CallContract error", err)
+		Fatal("getCurrentNumberAbi method CallContract", " error", err)
 	}
 	method, _ := abiHeaderStore.Methods[CurNbrAndHash]
 	ret, err := method.Outputs.Unpack(output)
@@ -118,13 +117,13 @@ func getCurrentNumberAbi(conn *ethclient.Client, chainType rawdb.ChainType, from
 func getRegisterBalance(conn *ethclient.Client, from common.Address) (uint64, uint64, uint64) {
 	header, err := conn.HeaderByNumber(context.Background(), nil)
 	if err != nil {
-		log.Error(err)
+		log.Error("getRegisterBalance", err)
 	}
 	input := packInput(abiRelayer, "getRelayerBalance", from)
 	msg := ethchain.CallMsg{From: from, To: &RelayerAddress, Data: input}
 	output, err := conn.CallContract(context.Background(), msg, header.Number)
 	if err != nil {
-		Fatal("method CallContract error", err)
+		Fatal("method CallContract", " error", err)
 	}
 	method, _ := abiRelayer.Methods["getRelayerBalance"]
 	ret, err := method.Outputs.Unpack(output)
@@ -148,17 +147,19 @@ func getRegisterBalance(conn *ethclient.Client, from common.Address) (uint64, ui
 func getTargetAddressBalance(conn *ethclient.Client, from common.Address, target common.Address) uint64 {
 	header, err := conn.HeaderByNumber(context.Background(), nil)
 	if err != nil {
-		log.Error(err)
+		log.Error("getTargetAddressBalance", err)
 	}
 	input := packInput(abiERC20, "balanceOf", target)
 	ERC20 := common.HexToAddress(Erc20ContractAddressMap)
+	//ERC20 := common.HexToAddress("0x8FEcD26a9567Cc3E518F8b94E54260997f7Ce399")
 	msg := ethchain.CallMsg{From: from, To: &ERC20, Data: input}
 	output, err := conn.CallContract(context.Background(), msg, header.Number)
 	if err != nil {
-		Fatal("method CallContract error", err)
+		Fatal("method CallContract ", " error", err)
 	}
 	method, _ := abiERC20.Methods["balanceOf"]
 	ret, err := method.Outputs.Unpack(output)
 	ret1 := ret[0].(*big.Int).Uint64()
+	//log.Info(ret1)
 	return ret1
 }

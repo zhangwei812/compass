@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
-	log "github.com/sirupsen/logrus"
+	"github.com/ethereum/go-ethereum/log"
 	"gopkg.in/urfave/cli.v1"
 	"math/big"
 	"time"
@@ -39,7 +39,7 @@ func (d *commpassInfo) sendTransationOnEth() {
 	for {
 		fmt.Println()
 		count++
-		fmt.Println("================= sendTransation to Eth========================Number", count)
+		log.Info("================= sendTransation to Eth========================", "Number", count)
 		token := common.HexToAddress(Erc20ContractAddress)
 		to := common.HexToAddress(DefaultTransactionAddress)
 		amount := big.NewInt(int64(DefaultAmount))
@@ -51,7 +51,7 @@ func (d *commpassInfo) sendTransationOnEth() {
 			big.NewInt(int64(ChainTypeMAPTemp)))
 		relayer := d.relayerData[0]
 		RouterContractAddress1 := common.HexToAddress(RouterContractAddress)
-		fmt.Println("from:", relayer.from.String(), "   to:", DefaultTransactionAddress, "  amount:", amount)
+		log.Info("sendTransationOnEth", "from:", relayer.from.String(), "   to:", DefaultTransactionAddress, "  amount:", amount)
 		b := sendContractTransaction(EthConn, relayer.from, RouterContractAddress1, nil, relayer.priKey, input)
 		if !b {
 			transFailNum++
@@ -59,8 +59,9 @@ func (d *commpassInfo) sendTransationOnEth() {
 		} else {
 			transSuccessNum++
 		}
-		fmt.Println("从", transStartTime, "开始 ", "发送了", transFailNum+transSuccessNum, "笔交易  ", "成功:", transSuccessNum, "失败:", transFailNum)
-		fmt.Println("waiting next time(Once an hour) to sendTranstion............")
+
+		log.Info("sendTransationOnEth", "开始时间：", transStartTime, "交易数量:", transFailNum+transSuccessNum, "成功次数:", transSuccessNum, "失败次数:", transFailNum)
+		log.Info("waiting next time(Once an hour) to sendTranstion............")
 		// 一个小时转一次
 		time.Sleep(3600 * time.Second)
 	}

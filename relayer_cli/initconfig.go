@@ -41,7 +41,7 @@ func initConfig1(ctx *cli.Context) {
 	if name == "save" {
 		configName = "compass_config_save.json"
 	}
-	fmt.Println("init config...")
+	log.Info("init config...")
 	data, err := ioutil.ReadFile(fmt.Sprintf(configName))
 	if err != nil {
 		log.Crit("compass config readFile Err", err.Error())
@@ -73,16 +73,16 @@ func initConfig2() {
 	////if config.StartVerityNum < n {
 	////	config.StartVerityNum = n
 	////}
-	fmt.Println("init over")
+	log.Info("init over")
 }
 
 func saveConfig(file string) {
 	data, err := json.Marshal(person)
 	if err != nil {
-		fmt.Println("saveConfig file failed", err.Error(), "    ", file)
+		log.Info("saveConfig file", "failed", err.Error(), "    ", file)
 		return
 	}
 	if err := ioutil.WriteFile(file, data, 1000); err != nil {
-		fmt.Println("saveConfig file failed", err.Error(), "    ", file)
+		log.Info("saveConfig file", "failed", err.Error(), "    ", file)
 	}
 }

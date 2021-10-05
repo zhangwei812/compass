@@ -11,11 +11,11 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/mapprotocol/atlas/chains"
 	"github.com/mapprotocol/atlas/core/vm"
 	"github.com/mapprotocol/atlas/params"
 	params2 "github.com/mapprotocol/atlas/params"
-	log "github.com/sirupsen/logrus"
 	"gopkg.in/urfave/cli.v1"
 	"io/ioutil"
 	"math/big"
@@ -119,11 +119,11 @@ func weiToEth(value *big.Int) uint64 {
 func loadprivate(keyfile string) (*ecdsa.PrivateKey, common.Address) {
 	keyjson, err := ioutil.ReadFile(keyfile)
 	if err != nil {
-		Fatal(fmt.Errorf("failed to read the keyfile at '%s': %v", keyfile, err))
+		Fatal("loadPrivate ReadFile", fmt.Errorf("failed to read the keyfile at '%s': %v", keyfile, err))
 	}
 	key, err := keystore.DecryptKey(keyjson, password)
 	if err != nil {
-		Fatal(fmt.Errorf("error decrypting key: %v", err))
+		Fatal("loadPrivate DecryptKey", fmt.Errorf("error decrypting key: %v", err))
 	}
 	priKey1 := key.PrivateKey
 	return priKey1, crypto.PubkeyToAddress(priKey1.PublicKey)
@@ -132,12 +132,12 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 	// Ensure a valid value field and resolve the account nonce
 	nonce, err := client.PendingNonceAt(context.Background(), from)
 	if err != nil {
-		log.Error(err)
+		log.Error("sendContractTransaction PendingNonceAt", err)
 	}
 
 	gasPrice, err := client.SuggestGasPrice(context.Background())
 	if err != nil {
-		log.Error(err)
+		log.Error("sendContractTransaction SuggestGasPrice", err)
 	}
 
 	gasLimit := uint64(2100000) // in units
@@ -146,9 +146,9 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 	msg := ethchain.CallMsg{From: from, To: &toAddress, GasPrice: gasPrice, Value: value, Data: input}
 	gasLimit, err = client.EstimateGas(context.Background(), msg)
 	if err != nil {
-		fmt.Println("Contract exec failed", err)
+		log.Info("Contract exec ", "failed", err)
 	}
-	//fmt.Println("EstimateGas gasLimit : ", gasLimit)
+	//log.Info("EstimateGas gasLimit : ", gasLimit)
 	if gasLimit < 1 {
 		gasLimit = 866328
 	}
@@ -158,18 +158,18 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 
 	chainID, err := client.ChainID(context.Background())
 	if err != nil {
-		log.Error(err)
+		log.Error("sendContractTransaction ChainID", "err", err)
 	}
-	//fmt.Println("TX data nonce ", nonce, " transfer value ", value, " gasLimit ", gasLimit, " gasPrice ", gasPrice, " chainID ", chainID)
+	//log.Info("TX data nonce ", nonce, " transfer value ", value, " gasLimit ", gasLimit, " gasPrice ", gasPrice, " chainID ", chainID)
 	signer := types.LatestSignerForChainID(chainID)
 	signedTx, err := types.SignTx(tx, signer, privateKey)
 	if err != nil {
-		log.Error(err)
+		log.Error("sendContractTransaction signedTx", err)
 	}
 
 	err = client.SendTransaction(context.Background(), signedTx)
 	if err != nil {
-		log.Error(err)
+		log.Error("sendContractTransaction line172", err)
 	}
 	txHash := signedTx.Hash()
 	count := 0
@@ -178,7 +178,7 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 		_, isPending, err := client.TransactionByHash(context.Background(), txHash)
 
 		if err != nil {
-			log.Error(err)
+			log.Error("sendContractTransaction TransactionByHash", err)
 		}
 		count++
 		if !isPending {
@@ -187,12 +187,12 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 	}
 	receipt, err := client.TransactionReceipt(context.Background(), txHash)
 	if err != nil {
-		log.Error(err)
+		log.Error("TransactionReceipt receipt1", err)
 		for {
 			time.Sleep(time.Millisecond * 200)
 			receipt, err = client.TransactionReceipt(context.Background(), txHash)
 			if err != nil {
-				log.Error(err)
+				log.Error("TransactionReceipt receipt2", err)
 			} else {
 				break
 			}
@@ -201,13 +201,13 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 	if receipt.Status == types.ReceiptStatusSuccessful {
 		block, err := client.BlockByHash(context.Background(), receipt.BlockHash)
 		if err != nil {
-			log.Error(err, "receipt.BlockHash:", receipt.BlockHash)
+			log.Error("Transaction", err, "receipt.BlockHash", receipt.BlockHash)
 		}
-		fmt.Println("Transaction Success", " block Number", receipt.BlockNumber.Uint64(), " block txs", len(block.Transactions()), "blockhash", block.Hash().Hex())
+		log.Info("Transaction Success", " block Number", receipt.BlockNumber.Uint64(), " block txs", len(block.Transactions()), "blockhash", block.Hash().Hex())
 		return true
 	} else if receipt.Status == types.ReceiptStatusFailed {
-		fmt.Println("TX data nonce ", nonce, " transfer value ", value, " gasLimit ", gasLimit, " gasPrice ", gasPrice, " chainID ", chainID)
-		fmt.Println("Transaction Failed ", " Block Number", receipt.BlockNumber.Uint64())
+		log.Info("TX data  ", "nonce", nonce, " transfer value", value, " gasLimit", gasLimit, " gasPrice", gasPrice, " chainID", chainID)
+		log.Info("Transaction Failed", " Block Number", receipt.BlockNumber.Uint64())
 		return false
 	}
 	return false
@@ -216,7 +216,7 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 func packInput(abiHeaderStore abi.ABI, abiMethod string, params ...interface{}) []byte {
 	input, err := abiHeaderStore.Pack(abiMethod, params...)
 	if err != nil {
-		Fatal(abiMethod, " error ", err)
+		Fatal(abiMethod, " error", err)
 	}
 	return input
 }
@@ -224,15 +224,15 @@ func packInput(abiHeaderStore abi.ABI, abiMethod string, params ...interface{}) 
 func reconnection(c *ethclient.Client) {
 	conn, err := ethclient.Dial(AtlasUrl)
 	for err != nil {
-		fmt.Println(err)
+		log.Error("reconnection", "err", err)
 		time.Sleep(1 * time.Second)
 	}
 	c = conn
 }
-func Fatal(args ...interface{}) {
+func Fatal(errName string, args ...interface{}) {
 	s := args[0].(string)
 	if strings.HasPrefix(s, "Post") {
 		reconnection(client)
 	}
-	Fatal(args)
+	log.Crit(errName, args)
 }

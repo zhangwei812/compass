@@ -7,10 +7,10 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/ethdb/memorydb"
 	"github.com/ethereum/go-ethereum/light"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/trie"
 	atlastypes "github.com/mapprotocol/atlas/core/types"
-	log "github.com/sirupsen/logrus"
 	"math/big"
 )
 
@@ -53,11 +53,11 @@ func GetTxProve(ethClient ethclient.Client, aLog *types.Log, eventResponse *Even
 	proof := light.NewNodeSet()
 	key, err := rlp.EncodeToBytes(transactionIndex)
 	if err != nil {
-		log.Error(err)
+		log.Error("GetTxProve key", err)
 	}
 	tr = atlastypes.DeriveTire(receipts, tr)
 	if err = tr.Prove(key, 0, proof); err != nil {
-		log.Error(err)
+		log.Error("GetTxProve Prove", err)
 	}
 
 	txProve := TxProve{
@@ -72,11 +72,11 @@ func GetTxProve(ethClient ethclient.Client, aLog *types.Log, eventResponse *Even
 		TxIndex:     transactionIndex,
 	}
 	//a, _ := json.Marshal(txProve)
-	//fmt.Println("txProve------> ", string(a))
+	//log.Info("txProve------> ", string(a))
 
 	input, err := rlp.EncodeToBytes(txProve)
 	if err != nil {
-		log.Error(err)
+		log.Error("GetTxProve input", err)
 	}
 	return input
 }
@@ -88,16 +88,16 @@ func queryNewReceiptsAndTr(blockNumber uint64, conn *ethclient.Client) {
 	var err error
 	tr, err = trie.New(common.Hash{}, trie.NewDatabase(memorydb.New()))
 	if err != nil {
-		log.Error(err)
+		log.Error("queryNewReceiptsAndTr trie.New:", err)
 	}
 	for i, r := range receipts {
 		key, err := rlp.EncodeToBytes(uint(i))
 		if err != nil {
-			log.Error(err)
+			log.Error("queryNewReceiptsAndTr key:", err)
 		}
 		value, err := rlp.EncodeToBytes(r)
 		if err != nil {
-			log.Error(err)
+			log.Error("queryNewReceiptsAndTr value:", err)
 		}
 
 		tr.Update(key, value)
@@ -106,7 +106,7 @@ func queryNewReceiptsAndTr(blockNumber uint64, conn *ethclient.Client) {
 func getTransactionsHashByBlockNumber(conn *ethclient.Client, number *big.Int) []common.Hash {
 	block, err := conn.BlockByNumber(context.Background(), number)
 	if err != nil {
-		log.Error(err)
+		log.Error("getTransactionsHashByBlockNumber block", err)
 	}
 	if block == nil {
 		log.Error("failed to connect to the eth node, please check the network")
@@ -124,7 +124,7 @@ func getReceiptsByTxsHash(conn *ethclient.Client, txsHash []common.Hash) []*type
 	for _, h := range txsHash {
 		r, err := conn.TransactionReceipt(context.Background(), h)
 		if err != nil {
-			log.Error(err)
+			log.Error("getReceiptsByTxsHash conn.TransactionReceipt", err)
 		}
 		if r == nil {
 			log.Error("failed to connect to the eth node, please check the network")

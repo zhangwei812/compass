@@ -39,7 +39,7 @@ func (d *commpassInfo) atlasBackend() {
 					// 次数没到 继续执行
 					number, err := conn.BlockNumber(context.Background())
 					if err != nil {
-						Fatal("get BlockNumber err ", err)
+						Fatal("get BlockNumber  ", "err", err)
 					}
 					currentEpoch := number / epochHeight
 					go func() { d.notifyCh <- currentEpoch }()
@@ -53,7 +53,7 @@ func (d *commpassInfo) atlasBackend() {
 		//-------保存,阶段-------
 		number, err := conn.BlockNumber(context.Background())
 		if err != nil {
-			Fatal("get BlockNumber err ", err)
+			Fatal("get BlockNumber ", "err ", err)
 		}
 		currentEpoch := number/epochHeight + 1
 		if currentEpoch != d.currentEpoch {

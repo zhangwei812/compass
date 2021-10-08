@@ -94,7 +94,7 @@ func (d *commpassInfo) doTxVerity1(fromBlock uint64, toBlock uint64) {
 	}
 	logs, err := EthConn.FilterLogs(context.Background(), query)
 	if err != nil {
-		log.Error("doTxVerity1", err)
+		log.Error("doTxVerity1", "err", err)
 	}
 	if len(logs) > 0 {
 		log.Info("Discover new transactions!!!", "from", fromBlock, "to", toBlock)
@@ -115,7 +115,7 @@ func (d *commpassInfo) doTxVerity1(fromBlock uint64, toBlock uint64) {
 func (d *commpassInfo) HandleLogSwapOut(aLog *types.Log, ethConn *ethclient.Client) {
 	err := abiRouter.UnpackIntoInterface(&eventResponse, "LogSwapOut", aLog.Data)
 	if err != nil {
-		log.Error("HandleLogSwapOut", err)
+		log.Error("HandleLogSwapOut", "err", err)
 	}
 	txProve := GetTxProve(*ethConn, aLog, &eventResponse)
 

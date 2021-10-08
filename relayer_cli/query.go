@@ -55,7 +55,7 @@ func (d *commpassInfo) queryCommpassInfo(ss string) {
 func getBalance(conn *ethclient.Client, address common.Address) *big.Float {
 	balance, err := conn.BalanceAt(context.Background(), address, nil)
 	if err != nil {
-		log.Error("getBalance", err)
+		log.Error("getBalance", "err", err)
 	}
 	balance2 := new(big.Float)
 	balance2.SetString(balance.String())
@@ -66,7 +66,7 @@ func getBalance(conn *ethclient.Client, address common.Address) *big.Float {
 func queryRegisterInfo(conn *ethclient.Client, from common.Address) (bool, bool, *big.Int, error) {
 	header, err := conn.HeaderByNumber(context.Background(), nil)
 	if err != nil {
-		log.Error("queryRegisterInfo HeaderByNumber", err)
+		log.Error("queryRegisterInfo HeaderByNumber", "err", err)
 	}
 	var input []byte
 	input = packInput(abiRelayer, "getRelayer", from)
@@ -99,7 +99,7 @@ func queryRegisterInfo(conn *ethclient.Client, from common.Address) (bool, bool,
 func getCurrentNumberAbi(conn *ethclient.Client, chainType rawdb.ChainType, from common.Address) (uint64, string) {
 	header, err := conn.HeaderByNumber(context.Background(), nil)
 	if err != nil {
-		log.Error("getCurrentNumberAbi", err)
+		log.Error("getCurrentNumberAbi", "err", err)
 	}
 	input := packInput(abiHeaderStore, CurNbrAndHash, big.NewInt(int64(chainType)))
 	msg := ethchain.CallMsg{From: from, To: &HeaderStoreAddress, Data: input}
@@ -117,7 +117,7 @@ func getCurrentNumberAbi(conn *ethclient.Client, chainType rawdb.ChainType, from
 func getRegisterBalance(conn *ethclient.Client, from common.Address) (uint64, uint64, uint64) {
 	header, err := conn.HeaderByNumber(context.Background(), nil)
 	if err != nil {
-		log.Error("getRegisterBalance", err)
+		log.Error("getRegisterBalance", "err", err)
 	}
 	input := packInput(abiRelayer, "getRelayerBalance", from)
 	msg := ethchain.CallMsg{From: from, To: &RelayerAddress, Data: input}
@@ -147,7 +147,7 @@ func getRegisterBalance(conn *ethclient.Client, from common.Address) (uint64, ui
 func getTargetAddressBalance(conn *ethclient.Client, from common.Address, target common.Address) uint64 {
 	header, err := conn.HeaderByNumber(context.Background(), nil)
 	if err != nil {
-		log.Error("getTargetAddressBalance", err)
+		log.Error("getTargetAddressBalance", "err", err)
 	}
 	input := packInput(abiERC20, "balanceOf", target)
 	ERC20 := common.HexToAddress(Erc20ContractAddressMap)

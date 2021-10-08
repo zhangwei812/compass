@@ -53,11 +53,11 @@ func GetTxProve(ethClient ethclient.Client, aLog *types.Log, eventResponse *Even
 	proof := light.NewNodeSet()
 	key, err := rlp.EncodeToBytes(transactionIndex)
 	if err != nil {
-		log.Error("GetTxProve key", err)
+		log.Error("GetTxProve key", "err:", err)
 	}
 	tr = atlastypes.DeriveTire(receipts, tr)
 	if err = tr.Prove(key, 0, proof); err != nil {
-		log.Error("GetTxProve Prove", err)
+		log.Error("GetTxProve Prove", "err", err)
 	}
 
 	txProve := TxProve{
@@ -76,7 +76,7 @@ func GetTxProve(ethClient ethclient.Client, aLog *types.Log, eventResponse *Even
 
 	input, err := rlp.EncodeToBytes(txProve)
 	if err != nil {
-		log.Error("GetTxProve input", err)
+		log.Error("GetTxProve input", "err", err)
 	}
 	return input
 }
@@ -88,12 +88,12 @@ func queryNewReceiptsAndTr(blockNumber uint64, conn *ethclient.Client) {
 	var err error
 	tr, err = trie.New(common.Hash{}, trie.NewDatabase(memorydb.New()))
 	if err != nil {
-		log.Error("queryNewReceiptsAndTr trie.New:", err)
+		log.Error("queryNewReceiptsAndTr trie.New:", "err", err)
 	}
 	for i, r := range receipts {
 		key, err := rlp.EncodeToBytes(uint(i))
 		if err != nil {
-			log.Error("queryNewReceiptsAndTr key:", err)
+			log.Error("queryNewReceiptsAndTr key:", "err", err)
 		}
 		value, err := rlp.EncodeToBytes(r)
 		if err != nil {
@@ -124,7 +124,7 @@ func getReceiptsByTxsHash(conn *ethclient.Client, txsHash []common.Hash) []*type
 	for _, h := range txsHash {
 		r, err := conn.TransactionReceipt(context.Background(), h)
 		if err != nil {
-			log.Error("getReceiptsByTxsHash conn.TransactionReceipt", err)
+			log.Error("getReceiptsByTxsHash conn.TransactionReceipt", "err", err)
 		}
 		if r == nil {
 			log.Error("failed to connect to the eth node, please check the network")

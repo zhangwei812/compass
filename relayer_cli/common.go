@@ -132,12 +132,12 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 	// Ensure a valid value field and resolve the account nonce
 	nonce, err := client.PendingNonceAt(context.Background(), from)
 	if err != nil {
-		log.Error("sendContractTransaction PendingNonceAt", err)
+		log.Error("sendContractTransaction PendingNonceAt", "err", err)
 	}
 
 	gasPrice, err := client.SuggestGasPrice(context.Background())
 	if err != nil {
-		log.Error("sendContractTransaction SuggestGasPrice", err)
+		log.Error("sendContractTransaction SuggestGasPrice", "err", err)
 	}
 
 	gasLimit := uint64(2100000) // in units
@@ -164,12 +164,12 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 	signer := types.LatestSignerForChainID(chainID)
 	signedTx, err := types.SignTx(tx, signer, privateKey)
 	if err != nil {
-		log.Error("sendContractTransaction signedTx", err)
+		log.Error("sendContractTransaction signedTx", "err", err)
 	}
 
 	err = client.SendTransaction(context.Background(), signedTx)
 	if err != nil {
-		log.Error("sendContractTransaction line172", err)
+		log.Error("sendContractTransaction line172", "err", err)
 	}
 	txHash := signedTx.Hash()
 	count := 0
@@ -178,7 +178,7 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 		_, isPending, err := client.TransactionByHash(context.Background(), txHash)
 
 		if err != nil {
-			log.Error("sendContractTransaction TransactionByHash", err)
+			log.Error("sendContractTransaction TransactionByHash", "err", err)
 		}
 		count++
 		if !isPending {
@@ -187,12 +187,13 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 	}
 	receipt, err := client.TransactionReceipt(context.Background(), txHash)
 	if err != nil {
-		log.Error("TransactionReceipt receipt1", err)
+		log.Error("TransactionReceipt receipt1", "err", err)
+		log.Error("waiting Receipt...", "err", err)
 		for {
-			time.Sleep(time.Millisecond * 200)
+			time.Sleep(time.Second * 2)
 			receipt, err = client.TransactionReceipt(context.Background(), txHash)
 			if err != nil {
-				log.Error("TransactionReceipt receipt2", err)
+				log.Error("TransactionReceipt receipt2", "err", err)
 			} else {
 				break
 			}
@@ -201,7 +202,7 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 	if receipt.Status == types.ReceiptStatusSuccessful {
 		block, err := client.BlockByHash(context.Background(), receipt.BlockHash)
 		if err != nil {
-			log.Error("Transaction", err, "receipt.BlockHash", receipt.BlockHash)
+			log.Error("Transaction", "err", err, "receipt.BlockHash", receipt.BlockHash)
 		}
 		log.Info("Transaction Success", " block Number", receipt.BlockNumber.Uint64(), " block txs", len(block.Transactions()), "blockhash", block.Hash().Hex())
 		return true

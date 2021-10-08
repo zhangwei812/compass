@@ -65,6 +65,7 @@ func (d *commpassInfo) doSave(chains []types.Header) {
 		return
 	}
 	marshal, _ := rlp.EncodeToBytes(chains)
+	log.Info("chains bytes size", " len ", len(marshal), "chains length", l)
 	conn := d.client
 	for k, _ := range d.relayerData {
 		person[0].Count += int64(l)

@@ -29,6 +29,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/mapprotocol/compass/helper/build"
+	"go/parser"
 	"io/ioutil"
 	"log"
 	"os"
@@ -126,12 +127,23 @@ func doInstall(cmdline []string) {
 	}
 	packages = build.ExpandPackagesNoVendor(packages)
 
-	// Seems we are cross compiling, work around forbidden GOBIN
-	goinstall := goToolArch(*arch, *cc, "install", buildFlags(env)...)
-	goinstall.Args = append(goinstall.Args, "-v")
-	goinstall.Args = append(goinstall.Args, []string{"-buildmode", "archive"}...)
-	goinstall.Args = append(goinstall.Args, packages...)
-	build.MustRun(goinstall)
+	if relayer_cli, err := ioutil.ReadDir("relayer_cli"); err == nil {
+		pkgs, err := parser.ParseDir(token.NewFileSet(), filepath.Join(".", "relayer_cli", relayer_cli.Name()), nil, parser.PackageClauseOnly)
+		if err != nil {
+			log.Fatal(err)
+		}
+		for name := range pkgs {
+			if name == "main" {
+				// Seems we are cross compiling, work around forbidden GOBIN
+				goinstall := goToolArch(*arch, *cc, "install", buildFlags(env)...)
+				goinstall.Args = append(goinstall.Args, "-v")
+				goinstall.Args = append(goinstall.Args, []string{"-buildmode", "archive"}...)
+				goinstall.Args = append(goinstall.Args, packages...)
+				build.MustRun(goinstall)
+				break
+			}
+		}
+	}
 }
 
 func buildFlags(env build.Environment) (flags []string) {

@@ -49,9 +49,14 @@ func init5() {
 	Erc20ContractAddress = config.ERC20ContractAddress
 	RouterContractAddressMap = config.RouterContractAddress_map
 	Erc20ContractAddressMap = config.ERC20ContractAddress_map
-	currentVerityNum = config.StartVerityNum // 开始验证区块起始头
+	currentVerityNum = max(uint64(person[0].Txverity), config.StartVerityNum) // 开始验证区块起始头
 }
-
+func max(x, y uint64) uint64 {
+	if x > y {
+		return x
+	}
+	return y
+}
 func (d *compassInfo) doTxVerity() {
 	tempCount := 0
 	txStartTime = time.Now().Format("2006/1/2 15:04:05")

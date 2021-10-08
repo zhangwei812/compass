@@ -47,7 +47,7 @@ func initConfig1(ctx *cli.Context) {
 		log.Crit("compass config readFile Err", err.Error())
 	}
 	_ = json.Unmarshal(data, &config)
-	initConfig2()
+	initConfig2(ctx)
 }
 
 type PersonInfo struct {
@@ -58,8 +58,13 @@ type PersonInfo struct {
 
 var person []PersonInfo
 
-func initConfig2() {
-	data, err := ioutil.ReadFile(fmt.Sprintf("person_info_txverify.json"))
+func initConfig2(ctx *cli.Context) {
+	name := ctx.Command.Name
+	configName := "person_info_txverify.json"
+	if name == "save" {
+		configName = "person_info_save.json"
+	}
+	data, err := ioutil.ReadFile(configName)
 	if err != nil {
 		log.Crit("compass personInfo config readFile Err", err.Error())
 	}

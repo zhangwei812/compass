@@ -44,9 +44,15 @@ func (d *compassInfo) queryCommpassInfo(ss string) {
 	case REWARD:
 
 	case ChaintypeHeight:
+		ctx := d.ctx
+		name := ctx.Command.Name
 		for k := range d.relayerData {
 			currentTypeHeight, hash := getCurrentNumberAbi(conn, ChainTypeETH, d.relayerData[k].from)
-			log.Info("query header_currentNumberAndHash", "currentTypeHeight", currentTypeHeight, "  HASH", hash, " My txverify record num", person[0].Txverity)
+			if name == "save" {
+				log.Info("query header_currentNumberAndHash", "currentTypeHeight", currentTypeHeight, "  HASH", hash)
+			} else {
+				log.Info("query header_currentNumberAndHash", "currentTypeHeight", currentTypeHeight, "  HASH", hash, "txVerify all", person[0].Txverity)
+			}
 		}
 	}
 

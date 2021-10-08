@@ -57,6 +57,7 @@ func (d *compassInfo) saveMock() {
 			} else {
 				d.queryCommpassInfo(ChaintypeHeight)
 				log.Info("waiting  new transactions....")
+				time.Sleep(time.Second * 5)
 			}
 			go func() { d.atlasBackendCh <- NextStep }()
 		}

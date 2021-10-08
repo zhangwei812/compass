@@ -157,12 +157,12 @@ func (d *compassInfo) HandleLogSwapOut(aLog *types.Log, ethConn *ethclient.Clien
 	relayer := d.relayerData[0]
 	RouterContractAddressMap1 := common.HexToAddress(RouterContractAddressMap)
 	balance1 := getTargetAddressBalance(conn, relayer.from, to)
-	log.Info("target mint1", "Address", to.String(), "balance", balance1, "will mint", eventResponse.Amount)
+	log.Info("TxVerify target mint1", "Address", to.String(), "balance", balance1, "will mint", eventResponse.Amount)
 	result := sendContractTransaction(conn, relayer.from, RouterContractAddressMap1, nil, relayer.priKey, input)
 	log.Info("TxVerify ", "result", result, "eth blockNumber", aLog.BlockNumber, "transactionIndex", aLog.TxIndex)
 	balance2 := getTargetAddressBalance(conn, relayer.from, to)
 	c := balance2 - balance1
-	log.Info("target mint2", "Address", to.String(), "balance", balance2, "change money", balance2-balance1)
+	log.Info("TxVerify target mint2", "Address", to.String(), "balance", balance2, "change money", balance2-balance1)
 	if big.NewInt(int64(c)).Cmp(eventResponse.Amount) != 0 {
 		log.Info("err: abnormal mint--->", " Address", to.String(), "  balance", balance2, "change money", balance2-balance1)
 	}
@@ -181,6 +181,7 @@ func txRecord(result bool, aLog *types.Log, d *compassInfo) {
 	}
 	l := len(txFailRecord)
 	nowNum, _ := d.client.BlockNumber(context.Background())
+	d.queryCommpassInfo(ChaintypeHeight)
 	log.Info("txRecord1", "arrive ethBlockNumber", currentVerityNum)
 	log.Info("txRecord2", "start time", txStartTime, "count", txSuccessNum+txFailNum, "success", txSuccessNum, "fail", txFailNum)
 	log.Info("txRecord3", "atlas's eth blockNumber", nowEthBlockInAtlas, "Atlas block number", nowNum)

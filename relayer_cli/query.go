@@ -20,21 +20,21 @@ const (
 	NextStep         = "next step"
 )
 
-func (d *commpassInfo) queryCommpassInfo(ss string) {
+func (d *compassInfo) queryCommpassInfo(ss string) {
 	conn := d.client
 	switch ss {
 	case BALANCE:
-		for k, _ := range d.relayerData {
+		for k := range d.relayerData {
 			log.Info("query balance", "ADDRESS", d.relayerData[k].from, " old balance", d.relayerData[k].preBalance, " now balance", getBalance(conn, d.relayerData[k].from))
 		}
 	case RegisterBalance:
-		for k, _ := range d.relayerData {
+		for k := range d.relayerData {
 			registered, unregistering, unregistered := getRegisterBalance(conn, d.relayerData[k].from)
 			log.Info("query RegisterBalance", "ADDRESS", d.relayerData[k].from,
 				" NOW registerValue BALANCE", registered, " register BALANCE", unregistering, "registered balance", unregistered)
 		}
 	case QueryRelayerinfo:
-		for k, _ := range d.relayerData {
+		for k := range d.relayerData {
 			bool1, bool2, relayerEpoch, _ := queryRegisterInfo(conn, d.relayerData[k].from)
 			log.Info("query QueryRelayerinfo", "ADDRESS", d.relayerData[k].from, "register success", bool1, " isrelayer", bool2, " relayer_epoch", relayerEpoch)
 			if !bool2 {
@@ -44,9 +44,9 @@ func (d *commpassInfo) queryCommpassInfo(ss string) {
 	case REWARD:
 
 	case ChaintypeHeight:
-		for k, _ := range d.relayerData {
+		for k := range d.relayerData {
 			currentTypeHeight, hash := getCurrentNumberAbi(conn, ChainTypeETH, d.relayerData[k].from)
-			log.Info("query header_currentNumberAndHash:", "currentTypeHeight", currentTypeHeight, "  HASH:", hash, " My txverify record num", person[0].Txverity)
+			log.Info("query header_currentNumberAndHash", "currentTypeHeight", currentTypeHeight, "  HASH", hash, " My txverify record num", person[0].Txverity)
 		}
 	}
 

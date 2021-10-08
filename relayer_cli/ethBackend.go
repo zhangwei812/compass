@@ -16,7 +16,7 @@ func dialEthConn() (*ethclient.Client, string) {
 	}
 	return conn, url
 }
-func (d *commpassInfo) getEthHeaders() []types.Header {
+func (d *compassInfo) getEthHeaders() []types.Header {
 	Ethconn, _ := dialEthConn()
 	startNum, _ := getCurrentNumberAbi(d.client, ChainTypeETH, d.relayerData[0].from)
 	nowEthBlockInAtlas = int(startNum)
@@ -29,7 +29,8 @@ func (d *commpassInfo) getEthHeaders() []types.Header {
 	}
 
 	var i uint64
-	LimitOnce = min(LimitOnce, a-startNum-12)
+	LimitOnce = min(config.LimitOnce, a-startNum-12)
+	//fmt.Println("LimitOnce:", LimitOnce, "a", a, "startNum", startNum) //LimitOnce: 1 a 11186031 startNum 11186017
 	for i = 1; i <= LimitOnce; i++ {
 		Header, err := Ethconn.HeaderByNumber(context.Background(), big.NewInt(int64(startNum+i)))
 		if err != nil {

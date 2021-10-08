@@ -24,7 +24,7 @@ func getAtlasConn() *ethclient.Client {
 	return conn
 }
 
-func (d *commpassInfo) atlasBackend() {
+func (d *compassInfo) atlasBackend() {
 	count := 0
 	conn := d.client
 	canNext := true

@@ -61,7 +61,7 @@ const (
 	ChainTypeMAPTemp = 177
 )
 
-type commpassInfo struct {
+type compassInfo struct {
 	atlasBackendCh chan string
 	notifyCh       chan uint64 // notify can do save
 	currentEpoch   uint64
@@ -80,7 +80,7 @@ type relayerInfo struct {
 	fee           uint64
 }
 
-func (d *commpassInfo) preWork(ctx *cli.Context) {
+func (d *compassInfo) preWork(ctx *cli.Context) {
 	conn := getAtlasConn()
 	d.atlasBackendCh = make(chan string)
 	d.notifyCh = make(chan uint64)
@@ -89,7 +89,7 @@ func (d *commpassInfo) preWork(ctx *cli.Context) {
 	d.ctx = ctx
 	for k := range d.relayerData {
 		Ele := d.relayerData[k]
-		priKey, from := loadprivate(Ele.url)
+		priKey, from := loadPrivate(Ele.url)
 		var acc common.Address
 		acc.SetBytes(from.Bytes())
 		Ele.registerValue = int64(registerValue)
@@ -116,7 +116,7 @@ func weiToEth(value *big.Int) uint64 {
 	return valueT
 }
 
-func loadprivate(keyfile string) (*ecdsa.PrivateKey, common.Address) {
+func loadPrivate(keyfile string) (*ecdsa.PrivateKey, common.Address) {
 	keyjson, err := ioutil.ReadFile(keyfile)
 	if err != nil {
 		Fatal("loadPrivate ReadFile", fmt.Errorf("failed to read the keyfile at '%s': %v", keyfile, err))
@@ -146,7 +146,7 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 	msg := ethchain.CallMsg{From: from, To: &toAddress, GasPrice: gasPrice, Value: value, Data: input}
 	gasLimit, err = client.EstimateGas(context.Background(), msg)
 	if err != nil {
-		log.Info("Contract exec ", "failed", err)
+		log.Info("client.EstimateGas Contract exec ", "failed", err)
 	}
 	//log.Info("EstimateGas gasLimit : ", gasLimit)
 	if gasLimit < 1 {
@@ -158,18 +158,18 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 
 	chainID, err := client.ChainID(context.Background())
 	if err != nil {
-		log.Error("sendContractTransaction ChainID", "err", err)
+		log.Error("sendContractTransaction ChainID", "client.ChainID err ", err)
 	}
 	//log.Info("TX data nonce ", nonce, " transfer value ", value, " gasLimit ", gasLimit, " gasPrice ", gasPrice, " chainID ", chainID)
 	signer := types.LatestSignerForChainID(chainID)
 	signedTx, err := types.SignTx(tx, signer, privateKey)
 	if err != nil {
-		log.Error("sendContractTransaction signedTx", "err", err)
+		log.Error("sendContractTransaction signedTx", "types.SignTx err", err)
 	}
 
 	err = client.SendTransaction(context.Background(), signedTx)
 	if err != nil {
-		log.Error("sendContractTransaction line172", "err", err)
+		log.Error("sendContractTransaction ", "client.SendTransaction err", err)
 	}
 	txHash := signedTx.Hash()
 	count := 0
@@ -186,16 +186,20 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 		}
 	}
 	receipt, err := client.TransactionReceipt(context.Background(), txHash)
+	count1 := 0
 	if err != nil {
 		log.Error("TransactionReceipt receipt1", "err", err)
-		log.Error("waiting Receipt...", "err", err)
 		for {
-			time.Sleep(time.Second * 2)
+			time.Sleep(time.Second * 5)
+			count1++
 			receipt, err = client.TransactionReceipt(context.Background(), txHash)
 			if err != nil {
-				log.Error("TransactionReceipt receipt2", "err", err)
+				log.Error("TransactionReceipt receipt finding...", "err", err)
 			} else {
 				break
+			}
+			if count1 > 10 {
+				return false
 			}
 		}
 	}
@@ -204,11 +208,11 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 		if err != nil {
 			log.Error("Transaction", "err", err, "receipt.BlockHash", receipt.BlockHash)
 		}
-		log.Info("Transaction Success", " block Number", receipt.BlockNumber.Uint64(), " block txs", len(block.Transactions()), "blockhash", block.Hash().Hex())
+		log.Info("Transaction Success", "block Number", receipt.BlockNumber.Uint64(), " block txs", len(block.Transactions()), "blockhash", block.Hash().Hex())
 		return true
 	} else if receipt.Status == types.ReceiptStatusFailed {
 		log.Info("TX data  ", "nonce", nonce, " transfer value", value, " gasLimit", gasLimit, " gasPrice", gasPrice, " chainID", chainID)
-		log.Info("Transaction Failed", " Block Number", receipt.BlockNumber.Uint64())
+		log.Info("Transaction Failed", "Block Number", receipt.BlockNumber.Uint64())
 		return false
 	}
 	return false

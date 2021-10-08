@@ -41,12 +41,12 @@ func checkFee(fee *big.Int) {
 	}
 }
 
-func (d *commpassInfo) relayerRegister() {
+func (d *compassInfo) relayerRegister() {
 	fmt.Println()
 	log.Info("--------------------do relayer Register-----------------------------------")
 	conn := d.client
 	ctx := d.ctx
-	for k, _ := range d.relayerData {
+	for k := range d.relayerData {
 		register(ctx, d.client, *d.relayerData[k])
 		for {
 			bool1, bool2, relayerEpoch, _ := queryRegisterInfo(conn, d.relayerData[k].from)
@@ -67,7 +67,7 @@ func (d *commpassInfo) relayerRegister() {
 		}
 	}
 }
-func (d *commpassInfo) waitBecomeRelayer(info relayerInfo) {
+func (d *compassInfo) waitBecomeRelayer(info relayerInfo) {
 	conn := d.client
 	register(d.ctx, d.client, info)
 	for {

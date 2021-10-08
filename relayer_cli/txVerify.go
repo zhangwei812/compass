@@ -35,7 +35,7 @@ var (
 
 func txverify(ctx *cli.Context) error {
 	initCfg(ctx)
-	commpassInfo := commpassInfo{}
+	commpassInfo := compassInfo{}
 	commpassInfo.relayerData = []*relayerInfo{
 		{url: keystore1},
 	}
@@ -52,7 +52,7 @@ func init5() {
 	currentVerityNum = config.StartVerityNum // 开始验证区块起始头
 }
 
-func (d *commpassInfo) doTxVerity() {
+func (d *compassInfo) doTxVerity() {
 	tempCount := 0
 	txStartTime = time.Now().Format("2006/1/2 15:04:05")
 	for {
@@ -82,7 +82,7 @@ func (d *commpassInfo) doTxVerity() {
 	}
 }
 
-func (d *commpassInfo) doTxVerity1(fromBlock uint64, toBlock uint64) {
+func (d *compassInfo) doTxVerity1(fromBlock uint64, toBlock uint64) {
 	nowEthBlockInAtlas = int(toBlock)
 	fmt.Println()
 	log.Info("=================DO TxVerity========================")
@@ -106,13 +106,14 @@ func (d *commpassInfo) doTxVerity1(fromBlock uint64, toBlock uint64) {
 		if EventSwapOutHash != aLog.Topics[0] {
 			continue
 		}
-		log.Info("doTxVerity1", "以太坊块高", aLog.BlockNumber, "交易ID", aLog.Index)
+		log.Info("")
+		log.Info("doTxVerity1", "eth block number", aLog.BlockNumber, "index", aLog.Index)
 		d.HandleLogSwapOut(&aLog, EthConn)
-		fmt.Println()
+
 	}
 }
 
-func (d *commpassInfo) HandleLogSwapOut(aLog *types.Log, ethConn *ethclient.Client) {
+func (d *compassInfo) HandleLogSwapOut(aLog *types.Log, ethConn *ethclient.Client) {
 	err := abiRouter.UnpackIntoInterface(&eventResponse, "LogSwapOut", aLog.Data)
 	if err != nil {
 		log.Error("HandleLogSwapOut", "err", err)
@@ -151,19 +152,19 @@ func (d *commpassInfo) HandleLogSwapOut(aLog *types.Log, ethConn *ethclient.Clie
 	relayer := d.relayerData[0]
 	RouterContractAddressMap1 := common.HexToAddress(RouterContractAddressMap)
 	balance1 := getTargetAddressBalance(conn, relayer.from, to)
-	log.Info("target mint1", " Address", to.String(), "  balance", balance1, "will mint", eventResponse.Amount)
+	log.Info("target mint1", "Address", to.String(), "balance", balance1, "will mint", eventResponse.Amount)
 	result := sendContractTransaction(conn, relayer.from, RouterContractAddressMap1, nil, relayer.priKey, input)
-	log.Info("TxVerify ", "result", result, "   eth blockNumber ", aLog.BlockNumber, "  transactionIndex: ", aLog.TxIndex)
-	txRecord(result, aLog, d)
+	log.Info("TxVerify ", "result", result, "eth blockNumber", aLog.BlockNumber, "transactionIndex", aLog.TxIndex)
 	balance2 := getTargetAddressBalance(conn, relayer.from, to)
 	c := balance2 - balance1
-	log.Info("target mint2", " Address", to.String(), "  balance", balance2, "change money", balance2-balance1)
+	log.Info("target mint2", "Address", to.String(), "balance", balance2, "change money", balance2-balance1)
 	if big.NewInt(int64(c)).Cmp(eventResponse.Amount) != 0 {
 		log.Info("err: abnormal mint--->", " Address", to.String(), "  balance", balance2, "change money", balance2-balance1)
 	}
+	txRecord(result, aLog, d)
 }
 
-func txRecord(result bool, aLog *types.Log, d *commpassInfo) {
+func txRecord(result bool, aLog *types.Log, d *compassInfo) {
 	if result {
 		txSuccessNum++
 	} else {
@@ -175,9 +176,11 @@ func txRecord(result bool, aLog *types.Log, d *commpassInfo) {
 	}
 	l := len(txFailRecord)
 	nowNum, _ := d.client.BlockNumber(context.Background())
-	log.Info("txRecord", "验证了", txSuccessNum+txFailNum, " 成功了", txSuccessNum, " 失败了", txFailNum, "验证到了", currentVerityNum, "当前atlas上Eth高度是", nowEthBlockInAtlas, "atals的块高", nowNum)
+	log.Info("txRecord1", "arrive ethBlockNumber", currentVerityNum)
+	log.Info("txRecord2", "start time", txStartTime, "count", txSuccessNum+txFailNum, "success", txSuccessNum, "fail", txFailNum)
+	log.Info("txRecord3", "atlas's eth blockNumber", nowEthBlockInAtlas, "Atlas block number", nowNum)
 	for l > 0 {
 		l--
-		log.Info("txRecord", "eth上第", txFailRecord[l].ethNum, "个块", "交易index是", txFailRecord[l].logIndex)
+		log.Info("txRecord fail record", "eth blockNumber", txFailRecord[l].ethNum, "index", txFailRecord[l].logIndex)
 	}
 }

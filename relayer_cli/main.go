@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/log"
 	"gopkg.in/urfave/cli.v1"
 	"os"
 	"path/filepath"
@@ -64,9 +65,9 @@ var (
 		Flags:  flags,
 	}
 	sendTransationCommand = cli.Command{
-		Name:   "sendTransation",
-		Usage:  "sendTransation Data",
-		Action: MigrateFlags(sendTransation),
+		Name:   "sendTransaction",
+		Usage:  "sendTransaction Data",
+		Action: MigrateFlags(sendTransaction),
 		Flags:  flags,
 	}
 )
@@ -113,7 +114,9 @@ func MigrateFlags(action func(ctx *cli.Context) error) func(*cli.Context) error 
 	return func(ctx *cli.Context) error {
 		for _, name := range ctx.FlagNames() {
 			if ctx.IsSet(name) {
-				ctx.GlobalSet(name, ctx.String(name))
+				if err := ctx.GlobalSet(name, ctx.String(name)); err != nil {
+					log.Error("MigrateFlags", "GlobalSet err", name)
+				}
 			}
 		}
 		return action(ctx)
@@ -121,7 +124,7 @@ func MigrateFlags(action func(ctx *cli.Context) error) func(*cli.Context) error 
 }
 
 func start(ctx *cli.Context) error {
-	commpassInfo := commpassInfo{}
+	commpassInfo := compassInfo{}
 	commpassInfo.relayerData = []*relayerInfo{
 		{url: keystore1},
 	}
@@ -137,5 +140,4 @@ func start(ctx *cli.Context) error {
 	// 创造交易
 	go commpassInfo.sendTransationOnEth()
 	select {}
-	return nil
 }

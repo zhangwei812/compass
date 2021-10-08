@@ -1,16 +1,16 @@
 {
-  "Keystore": "D:\/work/zhangwei812\/compass\/keystore\/UTC--2021-07-19T02-04-57.993791200Z--df945e6ffd840ed5787d367708307bd1fa3d40f4",
+  "Keystore": ".\/keystore\/UTC--2021-07-19T02-04-57.993791200Z--df945e6ffd840ed5787d367708307bd1fa3d40f4",
   "Password": "111111",
   "RouterContractAddress": "0x23dd5A89C3ea51601b0674a4fA6eC6B3B14d0B7a",
   "ERC20ContractAddress": "0x937afD74F97824789DA1f21AB75d19067bFb71dD",
   "RouterContractAddress_map": "0xC8EBb59E097148399D67601038a6c6Aaa6416aF9",
   "ERC20ContractAddress_map": "0x8FEcD26a9567Cc3E518F8b94E54260997f7Ce399",
-  "AtlasUrl": "http://localhost:8082",
+  "AtlasUrl": "http://159.138.90.210:7445",
   "EthUrl": "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
   "MaxCount": 10000,
   "RegisterValue": 100000,
   "StartVerityNum": 11130620,
-  "LimitOnce": 100,
+  "LimitOnce": 20,
   "DefaultTransactionAddress": "0xb324C41EF2B839C7918553EcC0230cC279660299",
   "DefaultAmount": 1
 }

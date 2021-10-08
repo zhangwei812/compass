@@ -15,5 +15,5 @@ GORUN = env GO111MODULE=on go run
 atlas:
 	$(GORUN) build/ci.go install .
 	@echo "Done building."
-	@echo "Run \"$(GOBIN)/atlas\" to launch atlas."
+	@echo "Run \"$(GOBIN)/compass\" to launch atlas."
 

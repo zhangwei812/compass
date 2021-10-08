@@ -125,14 +125,14 @@ func doInstall(cmdline []string) {
 		packages = flag.Args()
 	}
 	packages = build.ExpandPackagesNoVendor(packages)
-	// Seems we are cross compiling, work around forbidden GOBIN
-	goinstall := goToolArch(*arch, *cc, "build", buildFlags(env)...)
-	goinstall.Args = append(goinstall.Args, "-v")
-	gobuild.Args = append(gobuild.Args, []string{"-o", executablePath(relayer_cli.Name())}...)
-	gobuild.Args = append(gobuild.Args, "."+GOBIN)
-	goinstall.Args = append(goinstall.Args, packages...)
-	build.MustRun(goinstall)
 
+	// Seems we are cross compiling, work around forbidden GOBIN
+	goinstall := goToolArch(*arch, *cc, "install", buildFlags(env)...)
+	goinstall.Args = append(goinstall.Args, "-v")
+	goinstall.Args = append(goinstall.Args, []string{"-buildmode", "archive"}...)
+	goinstall.Args = append(goinstall.Args, packages...)
+	fmt.Println("goinstall", goinstall)
+	build.MustRun(goinstall)
 }
 
 func buildFlags(env build.Environment) (flags []string) {

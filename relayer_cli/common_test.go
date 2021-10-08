@@ -17,13 +17,13 @@ import (
 )
 
 func Test_CommpassInfo_preWork(t *testing.T) {
-	commpassInfo := commpassInfo{}
+	commpassInfo := compassInfo{}
 	commpassInfo.relayerData = []*relayerInfo{
 		{url: keystore1},
 	}
 	conn := getAtlasConn()
 	commpassInfo.client = conn
-	p, from := loadprivate(commpassInfo.relayerData[0].url)
+	p, from := loadPrivate(commpassInfo.relayerData[0].url)
 	var acc common.Address
 	acc.SetBytes(from.Bytes())
 	a := getBalance(conn, acc)

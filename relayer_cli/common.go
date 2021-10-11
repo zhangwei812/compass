@@ -207,9 +207,11 @@ func sendContractTransaction(client *ethclient.Client, from, toAddress common.Ad
 		block, err := client.BlockByHash(context.Background(), receipt.BlockHash)
 		if err != nil {
 			log.Error("Transaction", "err", err, "receipt.BlockHash", receipt.BlockHash)
+			return false
+		} else {
+			log.Info("Transaction Success", "block Number", receipt.BlockNumber.Uint64(), " block txs", len(block.Transactions()), "blockhash", block.Hash().Hex())
+			return true
 		}
-		log.Info("Transaction Success", "block Number", receipt.BlockNumber.Uint64(), " block txs", len(block.Transactions()), "blockhash", block.Hash().Hex())
-		return true
 	} else if receipt.Status == types.ReceiptStatusFailed {
 		log.Info("TX data  ", "nonce", nonce, " transfer value", value, " gasLimit", gasLimit, " gasPrice", gasPrice, " chainID", chainID)
 		log.Info("Transaction Failed", "Block Number", receipt.BlockNumber.Uint64())
